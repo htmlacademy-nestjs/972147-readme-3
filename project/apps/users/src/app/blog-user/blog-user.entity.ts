@@ -1,10 +1,14 @@
 import { User } from '@project/shared/app-types';
-import { fillObject } from '@project/util/util-core';
 import { compare, genSalt, hash } from 'bcrypt';
 import { SALT_ROUNDS } from "./blog-user.config";
+import { plainToInstance } from "class-transformer";
 
 export class BlogUserEntity extends User {
   private _passwordHash!: string;
+
+  constructor() {
+    super();
+  }
 
   public async setPassword(password: string): Promise<BlogUserEntity> {
     const salt = await genSalt(SALT_ROUNDS);
@@ -17,7 +21,7 @@ export class BlogUserEntity extends User {
   }
 
   public static create(user: User): BlogUserEntity {
-    return fillObject(BlogUserEntity, user);
+    return plainToInstance(BlogUserEntity, user, );
   }
 
   public toObject(): User {

@@ -31,7 +31,7 @@ export class BlogUserService {
   public async updateUser(id: string, dto: UpdateUserDto) {
     const res = await this.blogUserRepository.update({...dto, id});
     return match(res, {
-      Ok: (user) => user,
+      Ok: (user) => user.toObject(),
       Err: (e) => {
         throw e
       },
@@ -41,7 +41,7 @@ export class BlogUserService {
   public async getUser(id: string) {
     const res = await this.blogUserRepository.get(id);
     return match(res, {
-      Ok: (user) => user,
+      Ok: (user) => user.toObject(),
       Err: (e) => {
         throw e
       },

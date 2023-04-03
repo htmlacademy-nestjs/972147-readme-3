@@ -6,6 +6,8 @@ import { Ok, Err } from 'oxide.ts';
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { BlogUserEntity } from "../blog-user.entity";
 import { fillObject } from "@project/util/util-core";
+import { randomUUID } from 'node:crypto';
+import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class BlogUserMemoryRepository implements BlogUserRepository {
@@ -19,7 +21,7 @@ export class BlogUserMemoryRepository implements BlogUserRepository {
 
     const entity = BlogUserEntity.create({
       ...dto,
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       registeredAt: new Date(),
       postsCount: 0,
       subscribersCount: 0
@@ -36,10 +38,10 @@ export class BlogUserMemoryRepository implements BlogUserRepository {
 
   public async get(id: string): ApiResult<BlogUserEntity> {
     const existUser = this._get(id);
+
     if (existUser) {
       return Ok(existUser);
     }
-
     return Err(new NotFoundException());
   }
 
@@ -65,7 +67,7 @@ export class BlogUserMemoryRepository implements BlogUserRepository {
       return Err(new NotFoundException());
     }
 
-    const updatedUser = fillObject(BlogUserEntity, {...existUser, ...dto});
+    const updatedUser = plainToInstance(BlogUserEntity, {...existUser, ...dto});
     this.repository[updatedUser.id] = updatedUser;
     return Ok(updatedUser);
   }
