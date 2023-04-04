@@ -1,7 +1,6 @@
-import { User } from "@project/shared/app-types";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class CreateUserDto implements Partial<User> {
+export class CreateUserDto {
   @ApiProperty({
     description: 'User firstname',
     example: 'Ivan'
@@ -13,6 +12,12 @@ export class CreateUserDto implements Partial<User> {
     example: 'Ivanov'
   })
   public lastName!: string;
+
+  @ApiProperty({
+    description: 'User avatar link',
+    example: 'http://example.com/avatar.png'
+  })
+  public avatar!: string;
 
   @ApiProperty({
     description: 'User email',

@@ -2,7 +2,6 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestj
 import { BlogUserService } from "./blog-user.service";
 import { fillObject } from "@project/util/util-core";
 import { UserRdo } from "./rdo/user.rdo";
-import { UpdateUserDto } from "./dto/update-user.dto";
 import { UpdatePasswordDto } from "./dto/update-password.dto";
 import { ApiTags, ApiResponse } from "@nestjs/swagger";
 
@@ -27,22 +26,6 @@ export class BlogUserController {
   @HttpCode(HttpStatus.OK)
   public async getUserById(@Param('id') id: string): Promise<UserRdo> {
     const user = await this.blogUserService.getUser(id);
-    return fillObject(UserRdo, user);
-  }
-
-  @ApiResponse({
-    type: UserRdo,
-    status: HttpStatus.OK,
-    description: 'User has been successfully updated'
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'User not found'
-  })
-  @Post(':id/update')
-  @HttpCode(HttpStatus.OK)
-  public async update(@Body() dto: UpdateUserDto, @Param('id') id: string): Promise<UserRdo> {
-    const user = await this.blogUserService.updateUser(id, dto);
     return fillObject(UserRdo, user);
   }
 

@@ -1,8 +1,7 @@
-import { User } from "@project/shared/app-types";
 import { Expose } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class UserRdo implements User {
+export class UserRdo {
   @ApiProperty({
     description: 'User unique ID',
     example: '5ebc9b18-6564-4dec-b559-10402a71ab36'

@@ -1,11 +1,9 @@
-import { ApiResult } from "./api-result";
+export interface CrudRepository<Id, Entity, Result> {
+  get(id: Id): Promise<Result | null>;
 
-export interface CrudRepository<Id, Entity, CreateDTO, UpdateDTO> {
-  get(id: Id): ApiResult<Entity>;
+  create(entity: Entity): Promise<Result>;
 
-  create(createDTO: CreateDTO): ApiResult<Entity>;
+  update(id: Id, entity: Entity): Promise<Result>;
 
-  update(updateDTO: UpdateDTO): ApiResult<Entity>;
-
-  delete(id: Id): ApiResult<void>;
+  delete(id: Id): Promise<void>;
 }

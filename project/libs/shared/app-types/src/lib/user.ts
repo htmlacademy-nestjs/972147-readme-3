@@ -2,6 +2,7 @@ export abstract class User {
   public id!: string;
   public firstName!: string;
   public lastName!: string;
+  public passwordHash!: string;
   public email!: string;
   public avatar?: string;
   public registeredAt!: Date;
