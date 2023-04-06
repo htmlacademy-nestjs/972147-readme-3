@@ -5,8 +5,9 @@
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 import { AppModule } from './app/app.module';
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,7 +17,6 @@ async function bootstrap() {
     .setDescription('Users service API')
     .setVersion('1.0')
     .build();
-
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);

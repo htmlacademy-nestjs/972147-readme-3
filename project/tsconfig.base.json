@@ -8,13 +8,28 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "es2022",
     "module": "esnext",
     "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "preserveConstEnums": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "removeComments": true,
+    "strict": true,
+    "alwaysStrict": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@project/shared/app-types": ["libs/shared/app-types/src/index.ts"],
+      "@project/util/util-core": ["libs/util/util-core/src/index.ts"],
+      "@project/util/util-types": ["libs/util/util-types/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
