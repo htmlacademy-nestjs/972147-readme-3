@@ -3,7 +3,12 @@ import { BlogUserService } from "./blog-user.service";
 import { fillObject } from "@project/util/util-core";
 import { UserRdo } from "./rdo/user.rdo";
 import { UpdatePasswordDto } from "./dto/update-password.dto";
-import { ApiTags, ApiResponse } from "@nestjs/swagger";
+import {
+  ApiTags,
+  ApiOkResponse,
+  ApiNotFoundResponse,
+  ApiConflictResponse
+} from "@nestjs/swagger";
 
 @ApiTags('Users')
 @Controller('users')
@@ -13,13 +18,11 @@ export class BlogUserController {
   ) {
   }
 
-  @ApiResponse({
+  @ApiOkResponse({
     type: UserRdo,
-    status: HttpStatus.OK,
     description: 'User has been successfully retrieved.'
   })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
+  @ApiNotFoundResponse({
     description: 'User not found'
   })
   @Get(':id')
@@ -29,16 +32,13 @@ export class BlogUserController {
     return fillObject(UserRdo, user);
   }
 
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponse({
     description: 'Password has been successfully updated'
   })
-  @ApiResponse({
-    status: HttpStatus.CONFLICT,
+  @ApiConflictResponse({
     description: 'Old password is incorrect'
   })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
+  @ApiNotFoundResponse({
     description: 'User not found'
   })
   @Post(':id/change-password')

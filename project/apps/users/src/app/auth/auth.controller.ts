@@ -4,7 +4,13 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { fillObject } from "@project/util/util-core";
 import { LoggedUserRdo } from "./rdo/logged-user.rdo";
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse
+} from '@nestjs/swagger';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -14,13 +20,11 @@ export class AuthController {
   ) {
   }
 
-  @ApiResponse({
+  @ApiOkResponse({
     type: LoggedUserRdo,
-    status: HttpStatus.OK,
     description: 'User has been successfully logged.'
   })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
+  @ApiUnauthorizedResponse({
     description: 'Email or password is incorrect'
   })
   @Post('login')
@@ -30,12 +34,11 @@ export class AuthController {
     return fillObject(LoggedUserRdo, user);
   }
 
-  @ApiResponse({
+  @ApiCreatedResponse({
     type: LoggedUserRdo,
-    status: HttpStatus.CREATED,
     description: 'User has been successfully registered.'
   })
-  @ApiResponse({
+  @ApiConflictResponse({
     status: HttpStatus.CONFLICT,
     description: 'User with this email already exists'
   })

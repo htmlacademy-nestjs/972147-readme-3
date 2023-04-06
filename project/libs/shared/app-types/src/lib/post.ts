@@ -1,6 +1,5 @@
 import { PostTypeEnum } from "./post.type.enum";
 import { PostStateEnum } from "./post.state.enum";
-import { Author } from "./author";
 
 export abstract class Post {
   public id!: string;
@@ -11,5 +10,4 @@ export abstract class Post {
   public isRepost!: boolean;
   public likesCount!: number;
   public commentsCount!: number;
-  public author!: Author;
 }
