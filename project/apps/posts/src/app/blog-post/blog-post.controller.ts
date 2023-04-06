@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { BlogPostDtoGeneric } from './dto';
 import { BlogPostRdoMap, BlogPostRdoGeneric, LinkPostRdo, QuotePostRdo, TextPostRdo, ImagePostRdo, VideoPostRdo } from './rdo';
 import { BlogPostService } from "./blog-post.service";
@@ -53,6 +53,7 @@ export class BlogPostController {
   })
   @ApiParam({name: 'type', enum: PostTypeEnum})
   @Post(':type/:id/update')
+  @HttpCode(HttpStatus.OK)
   public async updatePost<T extends PostTypeEnum>(@Param('id') id: string, @Param() type: T, dto: BlogPostDtoGeneric<T>) {
     const post = await this.service.updatePost(type, id, dto);
     return fillObject(BlogPostRdoMap[type] as unknown as ClassConstructor<BlogPostRdoGeneric<T>>, post);

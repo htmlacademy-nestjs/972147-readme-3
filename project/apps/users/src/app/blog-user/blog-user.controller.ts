@@ -26,7 +26,6 @@ export class BlogUserController {
     description: 'User not found'
   })
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
   public async getUserById(@Param('id') id: string): Promise<UserRdo> {
     const user = await this.blogUserService.getUser(id);
     return fillObject(UserRdo, user);
