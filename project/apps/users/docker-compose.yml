@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  users.mongo:
+    image: mongo
+    restart: always
+    container_name: users.mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 12345678
+      MONGO_INITDB_DATABASE: users
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo.users:/data/db
+
+  users.mongo.ui:
+    image: mongo-express
+    restart: always
+    container_name: users.mongo.ui
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://admin:12345678@users.mongo:27017/
+    depends_on:
+      - users.mongo
+
+volumes:
+  mongo.users:
