@@ -1,4 +1,4 @@
-import { IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Max, Min } from 'class-validator';
 import { DbConfig } from "./db.config";
 
 const MIN_PORT = 0;
@@ -14,11 +14,13 @@ enum EnvValidationMessage {
 }
 
 export class DbEnv implements DbConfig {
+  @IsNotEmpty()
   @IsString({
     message: EnvValidationMessage.DBNameRequired
   })
   public name!: string;
 
+  @IsNotEmpty()
   @IsString({
     message: EnvValidationMessage.DBHostRequired
   })
@@ -31,16 +33,19 @@ export class DbEnv implements DbConfig {
   @Max(MAX_PORT)
   public port!: number;
 
+  @IsNotEmpty()
   @IsString({
     message: EnvValidationMessage.DBUserRequired
   })
   public user!: string;
 
+  @IsNotEmpty()
   @IsString({
     message: EnvValidationMessage.DBPasswordRequired
   })
   public password!: string;
 
+  @IsNotEmpty()
   @IsString({
     message: EnvValidationMessage.DBBaseAuthRequired
   })

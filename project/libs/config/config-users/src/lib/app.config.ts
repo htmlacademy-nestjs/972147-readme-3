@@ -5,20 +5,14 @@ import { AppEnv } from "./app-env";
 
 const DEFAULT_PORT = 3000;
 
-export enum EnvironmentType {
-  Development = 'development',
-  Production = 'production',
-  Stage = 'stage',
-}
-
 export interface ApplicationConfig {
-  environment: EnvironmentType;
+  environment: 'development' | 'production' | 'stage'
   port: number;
 }
 
 export default registerAs('application', (): ApplicationConfig => {
   const config: ApplicationConfig = {
-    environment: process.env.NODE_ENV as EnvironmentType,
+    environment: process.env.NODE_ENV as ApplicationConfig['environment'],
     port: parseInt(process.env.PORT || DEFAULT_PORT.toString(), 10),
   };
 

@@ -1,5 +1,5 @@
-import { IsEnum, IsNumber, Max, Min } from 'class-validator';
-import { ApplicationConfig, EnvironmentType } from "./app.config";
+import { IsIn, IsNumber, Max, Min } from 'class-validator';
+import { ApplicationConfig } from "./app.config";
 
 const MIN_PORT = 0;
 const MAX_PORT = 65535;
@@ -10,10 +10,10 @@ enum EnvValidationMessage {
 }
 
 export class AppEnv implements ApplicationConfig {
-  @IsEnum(EnvironmentType,{
+  @IsIn(['development', 'production', 'stage'],{
     message: EnvValidationMessage.AppEnvironmentRequired
   })
-  public environment!: EnvironmentType;
+  public environment!: 'development' | 'production' | 'stage';
 
   @IsNumber({}, {
     message: EnvValidationMessage.AppPortRequired
