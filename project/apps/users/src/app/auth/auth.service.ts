@@ -1,13 +1,13 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { BlogUserMemoryRepository } from "../blog-user/repository/blog-user.memory-repository";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { BlogUserEntity } from "../blog-user/blog-user.entity";
+import { BlogUserDbRepository } from "../blog-user/repository/blog-user.db-repository";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly blogUserRepository: BlogUserMemoryRepository,
+    private readonly blogUserRepository: BlogUserDbRepository,
   ) {
   }
 
@@ -16,7 +16,7 @@ export class AuthService {
     if (existUser) {
       throw new ConflictException();
     }
-    const userEntity = BlogUserEntity.create({
+    const userEntity = new BlogUserEntity({
       id: '',
       registeredAt: new Date(),
       postsCount: 0,
@@ -40,7 +40,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const blogUserEntity = BlogUserEntity.create(existUser);
+    const blogUserEntity = new BlogUserEntity(existUser);
     if (!await blogUserEntity.checkPassword(password)) {
       throw new UnauthorizedException();
     }
