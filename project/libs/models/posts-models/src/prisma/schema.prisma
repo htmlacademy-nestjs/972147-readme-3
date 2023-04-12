@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output = "../../../../../node_modules/.prisma/client"
+  output   = "../../../../../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -13,68 +13,68 @@ enum PostStatus {
   PUBLISHED
 }
 
-model Post {
-  id        Int        @id @default(autoincrement()) @ignore()
+model PostMetadata {
+  id        Int        @id @default(autoincrement())
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
   status    PostStatus @default(PUBLISHED)
   isRepost  Boolean    @default(false) @map("is_repost")
   userId    String?    @map("user_id")
-  PostImage PostImage?
-  PostLink  PostLink?
-  PostQuote PostQuote?
-  PostText  PostText?
-  PostVideo PostVideo?
+  postImage PostImage?
+  postLink  PostLink?
+  postQuote PostQuote?
+  postText  PostText?
+  postVideo PostVideo?
 
   @@map("posts_metadata")
 }
 
 model PostImage {
-  id       Int    @id @default(autoincrement())
-  imageUrl String @map("image_url")
-  postId   Int    @unique @map("post_id") @ignore()
-  metadata Post   @relation(fields: [postId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  id             Int          @id @default(autoincrement())
+  imageUrl       String       @map("image_url")
+  postMetadataId Int          @unique @map("post_metadata_id")
+  metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_images")
 }
 
 model PostLink {
-  id          Int    @id @default(autoincrement())
-  linkUrl     String @map("link_url")
-  description String
-  postId      Int    @unique @map("post_id") @ignore()
-  metadata    Post   @relation(fields: [postId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  id             Int          @id @default(autoincrement())
+  linkUrl        String       @map("link_url")
+  description    String
+  postMetadataId Int          @unique @map("post_metadata_id")
+  metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_links")
 }
 
 model PostQuote {
-  id          Int    @id @default(autoincrement())
-  text        String
-  quoteAuthor String @map("quote_author")
-  postId      Int    @unique @map("post_id") @ignore()
-  metadata    Post   @relation(fields: [postId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  id             Int          @id @default(autoincrement())
+  text           String
+  quoteAuthor    String       @map("quote_author")
+  postMetadataId Int          @unique @map("post_metadata_id")
+  metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_quotes")
 }
 
 model PostText {
-  id           Int    @id @default(autoincrement())
-  name         String
-  announceText String @map("announce_text")
-  mainText     String @map("main_text")
-  postId       Int    @unique @map("post_id") @ignore()
-  metadata     Post   @relation(fields: [postId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  id             Int          @id @default(autoincrement())
+  name           String
+  announceText   String       @map("announce_text")
+  mainText       String       @map("main_text")
+  postMetadataId Int          @unique @map("post_id")
+  metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_texts")
 }
 
 model PostVideo {
-  id       Int    @id @default(autoincrement())
-  name     String
-  linkUrl  String @map("link_url")
-  postId   Int    @unique @map("post_id") @ignore()
-  metadata Post   @relation(fields: [postId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  id             Int          @id @default(autoincrement())
+  name           String
+  linkUrl        String       @map("link_url")
+  postMetadataId Int          @unique @map("post_id")
+  metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_videos")
 }

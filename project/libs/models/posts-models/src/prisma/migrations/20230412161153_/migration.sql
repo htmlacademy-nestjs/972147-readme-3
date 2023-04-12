@@ -17,7 +17,7 @@ CREATE TABLE "posts_metadata" (
 CREATE TABLE "post_images" (
     "id" SERIAL NOT NULL,
     "image_url" TEXT NOT NULL,
-    "post_id" INTEGER NOT NULL,
+    "post_metadata_id" INTEGER NOT NULL,
 
     CONSTRAINT "post_images_pkey" PRIMARY KEY ("id")
 );
@@ -27,7 +27,7 @@ CREATE TABLE "post_links" (
     "id" SERIAL NOT NULL,
     "link_url" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "post_id" INTEGER NOT NULL,
+    "post_metadata_id" INTEGER NOT NULL,
 
     CONSTRAINT "post_links_pkey" PRIMARY KEY ("id")
 );
@@ -37,7 +37,7 @@ CREATE TABLE "post_quotes" (
     "id" SERIAL NOT NULL,
     "text" TEXT NOT NULL,
     "quote_author" TEXT NOT NULL,
-    "post_id" INTEGER NOT NULL,
+    "post_metadata_id" INTEGER NOT NULL,
 
     CONSTRAINT "post_quotes_pkey" PRIMARY KEY ("id")
 );
@@ -64,13 +64,13 @@ CREATE TABLE "post_videos" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "post_images_post_id_key" ON "post_images"("post_id");
+CREATE UNIQUE INDEX "post_images_post_metadata_id_key" ON "post_images"("post_metadata_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "post_links_post_id_key" ON "post_links"("post_id");
+CREATE UNIQUE INDEX "post_links_post_metadata_id_key" ON "post_links"("post_metadata_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "post_quotes_post_id_key" ON "post_quotes"("post_id");
+CREATE UNIQUE INDEX "post_quotes_post_metadata_id_key" ON "post_quotes"("post_metadata_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "post_texts_post_id_key" ON "post_texts"("post_id");
@@ -79,13 +79,13 @@ CREATE UNIQUE INDEX "post_texts_post_id_key" ON "post_texts"("post_id");
 CREATE UNIQUE INDEX "post_videos_post_id_key" ON "post_videos"("post_id");
 
 -- AddForeignKey
-ALTER TABLE "post_images" ADD CONSTRAINT "post_images_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts_metadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "post_images" ADD CONSTRAINT "post_images_post_metadata_id_fkey" FOREIGN KEY ("post_metadata_id") REFERENCES "posts_metadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "post_links" ADD CONSTRAINT "post_links_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts_metadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "post_links" ADD CONSTRAINT "post_links_post_metadata_id_fkey" FOREIGN KEY ("post_metadata_id") REFERENCES "posts_metadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "post_quotes" ADD CONSTRAINT "post_quotes_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts_metadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "post_quotes" ADD CONSTRAINT "post_quotes_post_metadata_id_fkey" FOREIGN KEY ("post_metadata_id") REFERENCES "posts_metadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "post_texts" ADD CONSTRAINT "post_texts_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts_metadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
