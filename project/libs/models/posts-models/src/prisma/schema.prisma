@@ -14,7 +14,7 @@ enum PostStatus {
 }
 
 model PostMetadata {
-  id        Int        @id @default(autoincrement())
+  id        String     @id @default(uuid())
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
   status    PostStatus @default(PUBLISHED)
@@ -30,50 +30,50 @@ model PostMetadata {
 }
 
 model PostImage {
-  id             Int          @id @default(autoincrement())
+  id             String       @id @default(uuid())
   imageUrl       String       @map("image_url")
-  postMetadataId Int          @unique @map("post_metadata_id")
+  postMetadataId String       @unique @map("post_metadata_id")
   metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_images")
 }
 
 model PostLink {
-  id             Int          @id @default(autoincrement())
+  id             String       @id @default(uuid())
   linkUrl        String       @map("link_url")
-  description    String
-  postMetadataId Int          @unique @map("post_metadata_id")
+  description    String?
+  postMetadataId String       @unique @map("post_metadata_id")
   metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_links")
 }
 
 model PostQuote {
-  id             Int          @id @default(autoincrement())
+  id             String       @id @default(uuid())
   text           String
   quoteAuthor    String       @map("quote_author")
-  postMetadataId Int          @unique @map("post_metadata_id")
+  postMetadataId String       @unique @map("post_metadata_id")
   metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_quotes")
 }
 
 model PostText {
-  id             Int          @id @default(autoincrement())
+  id             String       @id @default(uuid())
   name           String
   announceText   String       @map("announce_text")
   mainText       String       @map("main_text")
-  postMetadataId Int          @unique @map("post_id")
+  postMetadataId String       @unique @map("post_id")
   metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_texts")
 }
 
 model PostVideo {
-  id             Int          @id @default(autoincrement())
+  id             String       @id @default(uuid())
   name           String
   linkUrl        String       @map("link_url")
-  postMetadataId Int          @unique @map("post_id")
+  postMetadataId String       @unique @map("post_id")
   metadata       PostMetadata @relation(fields: [postMetadataId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("post_videos")

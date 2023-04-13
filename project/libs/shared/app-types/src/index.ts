@@ -6,7 +6,7 @@ export * from './lib/post-link';
 export * from './lib/post-video';
 export * from './lib/post-quote';
 export * from './lib/post-text';
-export * from './lib/post.state.enum';
+export * from './lib/post.status.enum';
 export * from './lib/post.type.enum';
 export * from './lib/post.generic';
 export * from './lib/tag';

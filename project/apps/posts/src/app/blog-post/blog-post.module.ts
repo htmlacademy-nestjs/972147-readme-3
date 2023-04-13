@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BlogPostService } from './blog-post.service';
-import { BlogPostMemoryRepositoryFactory } from './repositories/blog-post.memory.repository';
+import { BlogPostMemoryRepositoryFactory } from './repositories/memory';
 import { BlogPostController } from './blog-post.controller';
 
 @Module({

@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 async function fillDb() {
   await prisma.postImage.upsert({
-    where: {id: 1},
+    where: {id: ''},
     update: {},
     create: {
       imageUrl: 'https://picsum.photos/200/300',
@@ -14,7 +14,7 @@ async function fillDb() {
     }
   });
   await prisma.postText.upsert({
-    where: {id: 1},
+    where: {id: ''},
     update: {},
     create: {
       name: 'Hello world',
@@ -26,7 +26,7 @@ async function fillDb() {
     }
   });
   await prisma.postLink.upsert({
-    where: {id: 1},
+    where: {id: ''},
     update: {},
     create: {
       linkUrl: 'https://google.com',
@@ -37,7 +37,7 @@ async function fillDb() {
     }
   });
   await prisma.postVideo.upsert({
-    where: {id: 1},
+    where: {id: ''},
     update: {},
     create: {
       linkUrl: 'https://www.youtube.com/watch?v=QH2-TGUlwu4',
@@ -48,7 +48,7 @@ async function fillDb() {
     }
   });
   await prisma.postQuote.upsert({
-    where: {id: 1},
+    where: {id: ''},
     update: {},
     create: {
       quoteAuthor: 'John Doe',
