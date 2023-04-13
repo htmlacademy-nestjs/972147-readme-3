@@ -17,7 +17,7 @@ export class BlogPostDbVideoRepository implements BlogPostRepository<PostTypeEnu
   public async create(dto: VideoPostDto): Promise<PostVideo> {
     const dbPost = await this.prisma.postVideo.create({
       data: {
-        ...dto,
+        name: dto.name,
         linkUrl: dto.link,
         metadata: {
           create: {}
@@ -31,10 +31,13 @@ export class BlogPostDbVideoRepository implements BlogPostRepository<PostTypeEnu
   }
 
   public async delete(id: string): Promise<void> {
-    await this.prisma.postVideo.delete({
-      where: {
-        id,
+    return await this.prisma.$transaction(async (tx) => {
+      const dbPost = await tx.postVideo.findFirst({where: {id}, include: {metadata: true}});
+      if (!dbPost) {
+        throw new Error(`Post with id ${id} not found`);
       }
+      await tx.postVideo.delete({where: {id}});
+      await tx.postMetadata.delete({where: {id: dbPost.metadata.id}});
     });
   }
 
@@ -66,7 +69,10 @@ export class BlogPostDbVideoRepository implements BlogPostRepository<PostTypeEnu
       where: {
         id
       },
-      data: {...dto},
+      data: {
+        name: dto.name,
+        linkUrl: dto.link
+      },
       include: {
         metadata: true
       }

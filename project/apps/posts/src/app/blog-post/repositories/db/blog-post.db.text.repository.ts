@@ -17,7 +17,9 @@ export class BlogPostDbTextRepository implements BlogPostRepository<PostTypeEnum
   public async create(dto: TextPostDto): Promise<PostText> {
     const dbPost = await this.prisma.postText.create({
       data: {
-        ...dto,
+        mainText: dto.mainText,
+        announceText: dto.announceText,
+        name: dto.name,
         metadata: {
           create: {}
         }
@@ -30,10 +32,13 @@ export class BlogPostDbTextRepository implements BlogPostRepository<PostTypeEnum
   }
 
   public async delete(id: string): Promise<void> {
-    await this.prisma.postText.delete({
-      where: {
-        id,
+    return await this.prisma.$transaction(async (tx) => {
+      const dbPost = await tx.postText.findFirst({where: {id}, include: {metadata: true}});
+      if (!dbPost) {
+        throw new Error(`Post with id ${id} not found`);
       }
+      await tx.postText.delete({where: {id}});
+      await tx.postMetadata.delete({where: {id: dbPost.metadata.id}});
     });
   }
 
@@ -65,7 +70,11 @@ export class BlogPostDbTextRepository implements BlogPostRepository<PostTypeEnum
       where: {
         id
       },
-      data: {...dto},
+      data: {
+        mainText: dto.mainText,
+        announceText: dto.announceText,
+        name: dto.name,
+      },
       include: {
         metadata: true
       }

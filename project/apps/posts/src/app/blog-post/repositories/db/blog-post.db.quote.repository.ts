@@ -17,7 +17,8 @@ export class BlogPostDbQuoteRepository implements BlogPostRepository<PostTypeEnu
   public async create(dto: QuotePostDto): Promise<PostQuote> {
     const dbPost = await this.prisma.postQuote.create({
       data: {
-        ...dto,
+        text: dto.text,
+        quoteAuthor: dto.quoteAuthor,
         metadata: {
           create: {}
         }
@@ -30,10 +31,13 @@ export class BlogPostDbQuoteRepository implements BlogPostRepository<PostTypeEnu
   }
 
   public async delete(id: string): Promise<void> {
-    await this.prisma.postQuote.delete({
-      where: {
-        id,
+    return await this.prisma.$transaction(async (tx) => {
+      const dbPost = await tx.postQuote.findFirst({where: {id}, include: {metadata: true}});
+      if (!dbPost) {
+        throw new Error(`Post with id ${id} not found`);
       }
+      await tx.postQuote.delete({where: {id}});
+      await tx.postMetadata.delete({where: {id: dbPost.metadata.id}});
     });
   }
 
@@ -65,7 +69,10 @@ export class BlogPostDbQuoteRepository implements BlogPostRepository<PostTypeEnu
       where: {
         id
       },
-      data: {...dto},
+      data: {
+        text: dto.text,
+        quoteAuthor: dto.quoteAuthor,
+      },
       include: {
         metadata: true
       }

@@ -22,7 +22,7 @@ export class BlogPostDbLinkRepository implements BlogPostRepository<PostTypeEnum
   public async create(dto: LinkPostDto): Promise<PostLink> {
     const dbPost = await this.prisma.postLink.create({
       data: {
-        ...dto,
+        description: dto.description,
         linkUrl: dto.link,
         metadata: {
           create: {}
@@ -36,10 +36,13 @@ export class BlogPostDbLinkRepository implements BlogPostRepository<PostTypeEnum
   }
 
   public async delete(id: string): Promise<void> {
-    await this.prisma.postLink.delete({
-      where: {
-        id,
+    return await this.prisma.$transaction(async (tx) => {
+      const dbPost = await tx.postLink.findFirst({where: {id}, include: {metadata: true}});
+      if (!dbPost) {
+        throw new Error(`Post with id ${id} not found`);
       }
+      await tx.postLink.delete({where: {id}});
+      await tx.postMetadata.delete({where: {id: dbPost.metadata.id}});
     });
   }
 
@@ -71,7 +74,10 @@ export class BlogPostDbLinkRepository implements BlogPostRepository<PostTypeEnum
       where: {
         id
       },
-      data: {...dto},
+      data: {
+        description: dto.description,
+        linkUrl: dto.link
+      },
       include: {
         metadata: true
       }

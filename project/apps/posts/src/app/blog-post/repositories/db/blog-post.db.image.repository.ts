@@ -17,7 +17,7 @@ export class BlogPostDbImageRepository implements BlogPostRepository<PostTypeEnu
   public async create(dto: ImagePostDto): Promise<PostImage> {
     const dbPost = await this.prisma.postImage.create({
       data: {
-        ...dto,
+        imageUrl: dto.imageUrl,
         metadata: {
           create: {}
         }
@@ -30,10 +30,13 @@ export class BlogPostDbImageRepository implements BlogPostRepository<PostTypeEnu
   }
 
   public async delete(id: string): Promise<void> {
-    await this.prisma.postImage.delete({
-      where: {
-        id,
+    return await this.prisma.$transaction(async (tx) => {
+      const dbPost = await tx.postImage.findFirst({where: {id}, include: {metadata: true}});
+      if (!dbPost) {
+        throw new Error(`Post with id ${id} not found`);
       }
+      await tx.postImage.delete({where: {id}});
+      await tx.postMetadata.delete({where: {id: dbPost.metadata.id}});
     });
   }
 
@@ -65,7 +68,9 @@ export class BlogPostDbImageRepository implements BlogPostRepository<PostTypeEnu
       where: {
         id
       },
-      data: {...dto},
+      data: {
+        imageUrl: dto.imageUrl,
+      },
       include: {
         metadata: true
       }

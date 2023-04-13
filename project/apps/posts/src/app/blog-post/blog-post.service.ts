@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BlogPostMemoryRepositoryFactory } from "./repositories/memory";
+import { BlogPostDbRepositoryFactory } from "./repositories/db";
 import { PostTypeEnum } from "@project/shared/app-types";
 import { BlogPostDtoGeneric } from "./dto";
 
 @Injectable()
 export class BlogPostService {
-  constructor(private readonly factory: BlogPostMemoryRepositoryFactory) {
+  constructor(private readonly factory: BlogPostDbRepositoryFactory) {
   }
 
   public async getPost<T extends PostTypeEnum>(type: T, id: string) {
