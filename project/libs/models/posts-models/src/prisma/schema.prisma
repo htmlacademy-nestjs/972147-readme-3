@@ -8,6 +8,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  authorId  String   @map("author_id")
+  postId    String   @map("post_id")
+  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("likes")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  authorId  String   @map("author_id")
+  postId    String   @map("post_id")
+  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  text      String
+
+  @@map("comments")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  name      String   @unique
+  posts     Post[]
+
+  @@map("tags")
+}
+
 enum PostStatus {
   DRAFT
   PUBLISHED
@@ -31,6 +63,9 @@ model Post {
   postText         PostText?  @relation(fields: [postTextId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postVideoId      String?    @unique @map("post_video_id")
   postVideo        PostVideo? @relation(fields: [postVideoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  likes            Like[]
+  comments         Comment[]
+  tags             Tag[]
 
   @@map("posts")
 }
