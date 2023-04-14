@@ -1,4 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { PostTypeEnum } from "@project/shared/app-types";
+import { Expose } from "class-transformer";
 
 export class QuotePostDto {
   @ApiProperty({
@@ -12,4 +14,11 @@ export class QuotePostDto {
     example: 'John Doe'
   })
   public quoteAuthor!: string;
+
+  @ApiProperty({
+    description: 'Type of the post',
+    example: PostTypeEnum.QUOTE,
+  })
+  @Expose()
+  public type: PostTypeEnum.QUOTE = PostTypeEnum.QUOTE;
 }

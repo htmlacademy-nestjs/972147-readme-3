@@ -1,6 +1,7 @@
 import { PostRdo } from "./post.rdo";
 import { Expose } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
+import { PostTypeEnum } from "@project/shared/app-types";
 
 export class TextPostRdo extends PostRdo {
   @ApiProperty({
@@ -23,4 +24,11 @@ export class TextPostRdo extends PostRdo {
   })
   @Expose()
   public mainText!: string;
+
+  @ApiProperty({
+    description: 'Type of the post',
+    example: PostTypeEnum.TEXT,
+  })
+  @Expose()
+  public type: PostTypeEnum.TEXT = PostTypeEnum.TEXT;
 }

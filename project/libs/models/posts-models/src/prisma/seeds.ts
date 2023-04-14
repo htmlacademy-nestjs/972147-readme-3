@@ -2,72 +2,84 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+const fakeAuthorId = 'fakeAuthorId';
+
 async function fillDb() {
-  await prisma.postImage.upsert({
-    where: {id: ''},
+  await prisma.post.upsert({
+    where: { id: '' },
     update: {},
     create: {
-      imageUrl: 'https://picsum.photos/200/300',
-      metadata: {
-        create: {}
-      }
-    }
+      authorId: fakeAuthorId,
+      postImage: {
+        create: {
+          imageUrl: 'https://picsum.photos/200/300',
+        },
+      },
+    },
   });
-  await prisma.postText.upsert({
-    where: {id: ''},
+  await prisma.post.upsert({
+    where: { id: '' },
     update: {},
     create: {
-      name: 'Hello world',
-      announceText: 'Hello world',
-      mainText: 'Hello world',
-      metadata: {
-        create: {}
-      }
-    }
+      authorId: fakeAuthorId,
+      postLink: {
+        create: {
+          linkUrl: 'https://google.com',
+          description: 'Google',
+        },
+      },
+    },
   });
-  await prisma.postLink.upsert({
-    where: {id: ''},
+  await prisma.post.upsert({
+    where: { id: '' },
     update: {},
     create: {
-      linkUrl: 'https://google.com',
-      description: 'Google',
-      metadata: {
-        create: {}
-      }
-    }
+      authorId: fakeAuthorId,
+      postText: {
+        create: {
+          announceText: 'Announce text',
+          mainText: 'Full text',
+          name: 'Post name',
+        },
+      },
+    },
   });
-  await prisma.postVideo.upsert({
-    where: {id: ''},
+  await prisma.post.upsert({
+    where: { id: '' },
     update: {},
     create: {
-      linkUrl: 'https://www.youtube.com/watch?v=QH2-TGUlwu4',
-      name: 'Funny video',
-      metadata: {
-        create: {}
-      }
-    }
+      authorId: fakeAuthorId,
+      postVideo: {
+        create: {
+          linkUrl: 'https://www.youtube.com/watch?v=QH2-TGUlwu4',
+          name: 'Funny video',
+        },
+      },
+    },
   });
-  await prisma.postQuote.upsert({
-    where: {id: ''},
+  await prisma.post.upsert({
+    where: { id: '' },
     update: {},
     create: {
-      quoteAuthor: 'John Doe',
-      text: 'Hello world',
-      metadata: {
-        create: {}
-      }
-    }
+      authorId: fakeAuthorId,
+      postQuote: {
+        create: {
+          quoteAuthor: 'John Doe',
+          text: 'Text',
+        },
+      },
+    },
   });
-  console.info('🤘️ Database was filled')
+  console.info('🤘️ Database was filled');
 }
 
 fillDb()
   .then(async () => {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   })
   .catch(async (err) => {
     console.error(err);
-    await prisma.$disconnect()
+    await prisma.$disconnect();
 
     process.exit(1);
   });

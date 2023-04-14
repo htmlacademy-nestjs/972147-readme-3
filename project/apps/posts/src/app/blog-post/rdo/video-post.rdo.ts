@@ -1,6 +1,7 @@
 import { PostRdo } from "./post.rdo";
 import { Expose } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
+import { PostTypeEnum } from "@project/shared/app-types";
 
 export class VideoPostRdo extends PostRdo {
   @ApiProperty({
@@ -16,4 +17,11 @@ export class VideoPostRdo extends PostRdo {
   })
   @Expose()
   public link!: string;
+
+  @ApiProperty({
+    description: 'Type of the post',
+    example: PostTypeEnum.VIDEO,
+  })
+  @Expose()
+  public type: PostTypeEnum.VIDEO = PostTypeEnum.VIDEO;
 }

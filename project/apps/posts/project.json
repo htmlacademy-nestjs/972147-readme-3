@@ -73,6 +73,13 @@
         "cwd": "libs/models/posts-models/src/prisma"
       }
     },
+    "db:create_migration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma migrate dev --schema ./schema.prisma --skip-generate --skip-seed --create-only",
+        "cwd": "libs/models/posts-models/src/prisma"
+      }
+    },
     "db:migrate": {
       "executor": "nx:run-commands",
       "options": {

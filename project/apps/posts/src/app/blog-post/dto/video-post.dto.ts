@@ -1,4 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { PostTypeEnum } from "@project/shared/app-types";
+import { Expose } from "class-transformer";
 
 export class VideoPostDto {
   @ApiProperty({
@@ -12,4 +14,11 @@ export class VideoPostDto {
     example: 'https://www.youtube.com/watch?v=QH2-TGUlwu4'
   })
   public link!: string;
+
+  @ApiProperty({
+    description: 'Type of the post',
+    example: PostTypeEnum.VIDEO,
+  })
+  @Expose()
+  public type: PostTypeEnum.VIDEO = PostTypeEnum.VIDEO;
 }

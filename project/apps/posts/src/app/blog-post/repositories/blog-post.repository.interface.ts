@@ -1,12 +1,19 @@
-import { PostTypeEnum, PostGeneric } from "@project/shared/app-types";
-import { CrudRepository } from "@project/util/util-types";
-import { BlogPostDtoGeneric } from "../dto";
+import { PostTypeEnum, PostGeneric, PostUnion } from "@project/shared/app-types";
+import { BlogPostDtoGeneric } from '../dto';
 
-//eslint-disable-next-line
-export interface BlogPostRepository<T extends PostTypeEnum> extends CrudRepository<string, BlogPostDtoGeneric<T>, BlogPostDtoGeneric<T>, PostGeneric<T>> {
-  list(ids: string[]): Promise<PostGeneric<T>[]>;
-}
+export type ListBlogPostRepositoryParams = {
+  ids?: string[];
+  type?: PostTypeEnum;
+};
 
-export interface BlogPostRepositoryFactory {
-  getRepository<T extends PostTypeEnum>(type: T): BlogPostRepository<T>;
+export interface BlogPostRepository {
+  get(id: string): Promise<PostUnion | null>;
+
+  create<T extends PostTypeEnum>(post: BlogPostDtoGeneric<T>): Promise<PostGeneric<T>>;
+
+  update<T extends PostTypeEnum>(id: string, post: BlogPostDtoGeneric<T>): Promise<PostGeneric<T>>;
+
+  delete(id: string): Promise<void>;
+
+  list(params: ListBlogPostRepositoryParams): Promise<PostUnion[]>;
 }
