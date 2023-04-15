@@ -1,5 +1,5 @@
 import { Post, PostGeneric, PostImage, PostLink, PostQuote, PostStatusEnum, PostText, PostTypeEnum, PostUnion, PostVideo } from '@project/shared/app-types';
-import { BlogPostRepository, ListBlogPostRepositoryParams, PostAuthor } from "./blog-post.repository.interface";
+import { BlogPostRepository, ListBlogPostRepositoryParams, PostAuthor } from './blog-post.repository.interface';
 import { BlogPostDtoGeneric } from '../dto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -15,7 +15,14 @@ import {
 
 type Nullable<T> = T | null;
 
-type DBPostWithPostData = DBPost & {
+type DBPostWithCountJoin = DBPost & {
+  _count: {
+    likes: number;
+    comments: number;
+  };
+};
+
+type DBPostWithPostData = DBPostWithCountJoin & {
   postImage: Nullable<DBPostImage>;
   postVideo: Nullable<DBPostVideo>;
   postQuote: Nullable<DBPostQuote>;
@@ -37,7 +44,18 @@ export class BlogPostDbRepository implements BlogPostRepository {
     };
   }
 
-  private mapDBPostStatusToPostStatus = (status: DBPostStatus): PostStatusEnum => {
+  private getIncludedCount() {
+    return {
+      _count: {
+        select: {
+          likes: true,
+          comments: true,
+        },
+      },
+    };
+  }
+
+  private mapDBPostStatusToPostStatus(status: DBPostStatus): PostStatusEnum {
     switch (status) {
       case DBPostStatus.DRAFT:
         return PostStatusEnum.DRAFT;
@@ -46,9 +64,9 @@ export class BlogPostDbRepository implements BlogPostRepository {
       default:
         throw new Error(`Unknown DBPostStatus: ${status}`);
     }
-  };
+  }
 
-  private mapDBPostToPost = (dbPost: DBPost): Omit<Post, 'type'> => {
+  private mapDBPostToPost(dbPost: DBPostWithCountJoin): Omit<Post, 'type'> {
     return {
       id: dbPost.id,
       isRepost: dbPost.isRepost,
@@ -57,20 +75,20 @@ export class BlogPostDbRepository implements BlogPostRepository {
       authorId: dbPost.authorId,
       publishedAt: dbPost.publishedAt,
       status: this.mapDBPostStatusToPostStatus(dbPost.status),
-      likesCount: 0, //TODO: implement
-      commentsCount: 0 //TODO: implement
+      likesCount: dbPost._count.likes,
+      commentsCount: dbPost._count.comments,
     };
-  };
+  }
 
-  private mapDBPostImageToPostImage = (dbPost: DBPost, dbPostImage: Omit<DBPostImage, 'id'>): PostImage => {
+  private mapDBPostImageToPostImage(dbPost: DBPostWithCountJoin, dbPostImage: Omit<DBPostImage, 'id'>): PostImage {
     return {
       ...this.mapDBPostToPost(dbPost),
       type: PostTypeEnum.IMAGE,
       imageUrl: dbPostImage.imageUrl,
     };
-  };
+  }
 
-  private mapDBPostTextToPostText = (dbPost: DBPost, dbPostText: Omit<DBPostText, 'id'>): PostText => {
+  private mapDBPostTextToPostText(dbPost: DBPostWithCountJoin, dbPostText: Omit<DBPostText, 'id'>): PostText {
     return {
       ...this.mapDBPostToPost(dbPost),
       announceText: dbPostText.announceText,
@@ -78,36 +96,36 @@ export class BlogPostDbRepository implements BlogPostRepository {
       mainText: dbPostText.mainText,
       type: PostTypeEnum.TEXT,
     };
-  };
+  }
 
-  private mapDBPostQuoteToPostQuote = (dbPost: DBPost, dbPostQuote: Omit<DBPostQuote, 'id'>): PostQuote => {
+  private mapDBPostQuoteToPostQuote(dbPost: DBPostWithCountJoin, dbPostQuote: Omit<DBPostQuote, 'id'>): PostQuote {
     return {
       ...this.mapDBPostToPost(dbPost),
       quoteAuthor: dbPostQuote.quoteAuthor,
       text: dbPostQuote.text,
       type: PostTypeEnum.QUOTE,
     };
-  };
+  }
 
-  private mapDBPostLinkToPostLink = (dbPost: DBPost, dbPostLink: Omit<DBPostLink, 'id'>): PostLink => {
+  private mapDBPostLinkToPostLink(dbPost: DBPostWithCountJoin, dbPostLink: Omit<DBPostLink, 'id'>): PostLink {
     return {
       ...this.mapDBPostToPost(dbPost),
       link: dbPostLink.linkUrl,
       description: dbPostLink.description ? dbPostLink.description : undefined,
       type: PostTypeEnum.LINK,
     };
-  };
+  }
 
-  private mapDBPostVideoToPostVideo = (dbPost: DBPost, dbPostLink: Omit<DBPostVideo, 'id'>): PostVideo => {
+  private mapDBPostVideoToPostVideo(dbPost: DBPostWithCountJoin, dbPostLink: Omit<DBPostVideo, 'id'>): PostVideo {
     return {
       ...this.mapDBPostToPost(dbPost),
       link: dbPostLink.linkUrl,
       name: dbPostLink.name,
       type: PostTypeEnum.VIDEO,
     };
-  };
+  }
 
-  private mapDBPostWithPostToPostUnion = (dbPost: DBPostWithPostData): PostUnion => {
+  private mapDBPostWithPostToPostUnion(dbPost: DBPostWithPostData): PostUnion {
     if (dbPost.postImage) {
       return this.mapDBPostImageToPostImage(dbPost, dbPost.postImage);
     }
@@ -129,13 +147,24 @@ export class BlogPostDbRepository implements BlogPostRepository {
     }
 
     throw new Error(`Unknown post type for post with id: ${dbPost.id}`);
-  };
+  }
+
+  private prepareDbPostSchema<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>, type: 'create' | 'update') {
+    return {
+      postImage: dto.type === PostTypeEnum.IMAGE ? { [type]: { imageUrl: dto.imageUrl } } : undefined,
+      postText: dto.type === PostTypeEnum.TEXT ? { [type]: { name: dto.name, announceText: dto.announceText, mainText: dto.mainText } } : undefined,
+      postQuote: dto.type === PostTypeEnum.QUOTE ? { [type]: { quoteAuthor: dto.quoteAuthor, text: dto.text } } : undefined,
+      postLink: dto.type === PostTypeEnum.LINK ? { [type]: { linkUrl: dto.link, description: dto.description } } : undefined,
+      postVideo: dto.type === PostTypeEnum.VIDEO ? { [type]: { linkUrl: dto.link, name: dto.name } } : undefined,
+    };
+  }
 
   public async get(id: string): Promise<PostUnion | null> {
     const dbPost = await this.prisma.post.findFirst({
       where: { id },
       include: {
         ...this.getIncludedPosts(),
+        ...this.getIncludedCount(),
       },
     });
 
@@ -154,21 +183,12 @@ export class BlogPostDbRepository implements BlogPostRepository {
         },
       },
       include: {
-        ...this.getIncludedPosts(type)
+        ...this.getIncludedPosts(type),
+        ...this.getIncludedCount(),
       },
     });
 
     return dbPosts.map((dbPost) => this.mapDBPostWithPostToPostUnion(dbPost));
-  }
-
-  public prepareDbPostSchema<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>, type: 'create' | 'update') {
-    return {
-      postImage: dto.type === PostTypeEnum.IMAGE ? { [type]: { imageUrl: dto.imageUrl } } : undefined,
-      postText: dto.type === PostTypeEnum.TEXT ? { [type]: { name: dto.name, announceText: dto.announceText, mainText: dto.mainText } } : undefined,
-      postQuote: dto.type === PostTypeEnum.QUOTE ? { [type]: { quoteAuthor: dto.quoteAuthor, text: dto.text } } : undefined,
-      postLink: dto.type === PostTypeEnum.LINK ? { [type]: { linkUrl: dto.link, description: dto.description } } : undefined,
-      postVideo: dto.type === PostTypeEnum.VIDEO ? { [type]: { linkUrl: dto.link, name: dto.name } } : undefined,
-    };
   }
 
   public async create<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T, PostAuthor>): Promise<PostGeneric<T>> {
@@ -180,6 +200,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
       },
       include: {
         ...this.getIncludedPosts(dto.type),
+        ...this.getIncludedCount(),
       },
     });
 
@@ -193,11 +214,11 @@ export class BlogPostDbRepository implements BlogPostRepository {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      dbPost.postImageId && await tx.postImage.delete({ where: { id: dbPost.postImageId } });
-      dbPost.postLinkId && await tx.postLink.delete({ where: { id: dbPost.postLinkId } });
-      dbPost.postQuoteId && await tx.postQuote.delete({ where: { id: dbPost.postQuoteId } });
-      dbPost.postTextId && await tx.postText.delete({ where: { id: dbPost.postTextId } });
-      dbPost.postVideoId && await tx.postVideo.delete({ where: { id: dbPost.postVideoId } });
+      dbPost.postImageId && (await tx.postImage.delete({ where: { id: dbPost.postImageId } }));
+      dbPost.postLinkId && (await tx.postLink.delete({ where: { id: dbPost.postLinkId } }));
+      dbPost.postQuoteId && (await tx.postQuote.delete({ where: { id: dbPost.postQuoteId } }));
+      dbPost.postTextId && (await tx.postText.delete({ where: { id: dbPost.postTextId } }));
+      dbPost.postVideoId && (await tx.postVideo.delete({ where: { id: dbPost.postVideoId } }));
       await tx.post.delete({ where: { id } });
     });
   }
@@ -211,6 +232,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
       },
       include: {
         ...this.getIncludedPosts(dto.type),
+        ...this.getIncludedCount(),
       },
     });
 
