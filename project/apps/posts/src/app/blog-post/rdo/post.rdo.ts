@@ -25,6 +25,20 @@ export abstract class PostRdo implements Omit<Post, 'type'> {
   public updatedAt!: Date;
 
   @ApiProperty({
+    description: 'Post publication date',
+    example: '2020-01-01T00:00:00.000Z'
+  })
+  @Expose()
+  public publishedAt!: Date;
+
+  @ApiProperty({
+    description: 'Unique identifier of the author',
+    example: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p'
+  })
+  @Expose()
+  public authorId!: string;
+
+  @ApiProperty({
     description: 'Status of the post',
     enum: PostStatusEnum,
     example: PostStatusEnum.PUBLISHED,

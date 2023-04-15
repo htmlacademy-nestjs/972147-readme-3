@@ -1,8 +1,8 @@
-import { Author } from "./author";
-
 export abstract class Comment {
   public id!: string;
   public text!: string;
+  public postId!: string;
   public createdAt!: Date;
-  public author!: Author;
+  public updatedAt!: Date;
+  public authorId!: string;
 }

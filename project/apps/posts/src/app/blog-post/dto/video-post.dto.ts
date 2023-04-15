@@ -1,8 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { PostTypeEnum } from "@project/shared/app-types";
 import { Expose } from "class-transformer";
+import { PostDto } from "./post.dto";
 
-export class VideoPostDto {
+export class VideoPostDto extends PostDto {
   @ApiProperty({
     description: 'Video post name',
     example: 'Funny cat video'

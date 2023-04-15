@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { PostTypeEnum } from "@project/shared/app-types";
-import { Expose } from "class-transformer";
+import { PostDto } from "./post.dto";
 
-export class ImagePostDto {
+export class ImagePostDto extends PostDto {
   @ApiProperty({
     description: 'Link to image',
     example: 'https://example.com/image.png'
@@ -13,6 +13,5 @@ export class ImagePostDto {
     description: 'Type of the post',
     example: PostTypeEnum.IMAGE,
   })
-  @Expose()
   public type: PostTypeEnum.IMAGE = PostTypeEnum.IMAGE;
 }

@@ -14,4 +14,4 @@ export type BlogPostDtoMap = {
   [PostTypeEnum.VIDEO]: VideoPostDto;
 };
 
-export type BlogPostDtoGeneric<T extends PostTypeEnum> = T extends keyof BlogPostDtoMap ? InstanceType<ClassConstructor<BlogPostDtoMap[T]>> : never;
+export type BlogPostDtoGeneric<T extends PostTypeEnum, ExtraData = Record<string, any>> = T extends keyof BlogPostDtoMap ? InstanceType<ClassConstructor<BlogPostDtoMap[T] & ExtraData>> : never;

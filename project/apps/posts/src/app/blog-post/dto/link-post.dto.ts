@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { PostTypeEnum } from "@project/shared/app-types";
-import { Expose } from "class-transformer";
+import { PostDto } from "./post.dto";
 
-export class LinkPostDto {
+export class LinkPostDto extends PostDto {
   @ApiProperty({
     description: 'Link to be shared as post',
     example: 'https://www.google.com'
@@ -19,6 +19,5 @@ export class LinkPostDto {
     description: 'Type of the post',
     example: PostTypeEnum.LINK,
   })
-  @Expose()
   public type: PostTypeEnum.LINK = PostTypeEnum.LINK;
 }

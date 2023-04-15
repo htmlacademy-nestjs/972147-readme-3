@@ -1,4 +1,3 @@
-export * from './lib/author';
 export * from './lib/comment';
 export * from './lib/post';
 export * from './lib/post-image';

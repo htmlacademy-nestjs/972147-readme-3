@@ -6,7 +6,9 @@ export abstract class Post {
   public type!: PostTypeEnum;
   public createdAt!: Date;
   public updatedAt!: Date;
+  public publishedAt!: Date;
   public status!: PostStatusEnum;
+  public authorId!: string;
   public isRepost!: boolean;
   public likesCount!: number;
   public commentsCount!: number;

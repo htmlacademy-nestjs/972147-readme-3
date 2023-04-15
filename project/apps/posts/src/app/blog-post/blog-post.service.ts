@@ -19,7 +19,7 @@ export class BlogPostService {
   }
 
   public async createPost<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>) {
-    return await this.repository.create(dto);
+    return await this.repository.create({...dto, authorId: 'some author id'}); // TODO: get author id from context
   }
 
   public async deletePost(id: string) {

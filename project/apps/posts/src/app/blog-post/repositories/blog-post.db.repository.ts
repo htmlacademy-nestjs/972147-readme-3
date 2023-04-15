@@ -1,5 +1,5 @@
 import { Post, PostGeneric, PostImage, PostLink, PostQuote, PostStatusEnum, PostText, PostTypeEnum, PostUnion, PostVideo } from '@project/shared/app-types';
-import { BlogPostRepository, ListBlogPostRepositoryParams } from './blog-post.repository.interface';
+import { BlogPostRepository, ListBlogPostRepositoryParams, PostAuthor } from "./blog-post.repository.interface";
 import { BlogPostDtoGeneric } from '../dto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -54,9 +54,11 @@ export class BlogPostDbRepository implements BlogPostRepository {
       isRepost: dbPost.isRepost,
       createdAt: dbPost.createdAt,
       updatedAt: dbPost.updatedAt,
+      authorId: dbPost.authorId,
+      publishedAt: dbPost.publishedAt,
       status: this.mapDBPostStatusToPostStatus(dbPost.status),
       likesCount: 0, //TODO: implement
-      commentsCount: 0, //TODO: implement
+      commentsCount: 0 //TODO: implement
     };
   };
 
@@ -169,10 +171,11 @@ export class BlogPostDbRepository implements BlogPostRepository {
     };
   }
 
-  public async create<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>): Promise<PostGeneric<T>> {
+  public async create<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T, PostAuthor>): Promise<PostGeneric<T>> {
     const dbPost = await this.prisma.post.create({
       data: {
-        authorId: 'authorId', //TODO: implement
+        authorId: dto.authorId,
+        publishedAt: dto.publishedAt,
         ...this.prepareDbPostSchema(dto, 'create'),
       },
       include: {
@@ -203,6 +206,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
     const dbPost = await this.prisma.post.update({
       where: { id },
       data: {
+        publishedAt: dto.publishedAt,
         ...this.prepareDbPostSchema(dto, 'update'),
       },
       include: {

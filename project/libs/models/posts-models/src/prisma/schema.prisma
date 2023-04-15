@@ -49,6 +49,7 @@ model Post {
   id               String     @id @default(uuid())
   createdAt        DateTime   @default(now()) @map("created_at")
   updatedAt        DateTime   @default(now()) @updatedAt @map("updated_at")
+  publishedAt      DateTime   @default(now()) @map("published_at")
   authorId         String     @map("author_id")
   status           PostStatus @default(PUBLISHED)
   isRepost         Boolean    @default(false) @map("is_repost")

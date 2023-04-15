@@ -1,6 +1,6 @@
 import { Post, PostGeneric, PostStatusEnum, PostTypeEnum, PostUnion } from '@project/shared/app-types';
 import { randomUUID } from 'node:crypto';
-import { BlogPostRepository, ListBlogPostRepositoryParams } from './blog-post.repository.interface';
+import { PostAuthor, BlogPostRepository, ListBlogPostRepositoryParams } from "./blog-post.repository.interface";
 import { BlogPostDtoGeneric } from '../dto';
 import { Injectable } from '@nestjs/common';
 
@@ -28,9 +28,11 @@ export class BlogPostMemoryRepository implements BlogPostRepository {
       .map((post) => ({ ...post }));
   }
 
-  public async create<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>): Promise<PostGeneric<T>> {
+  public async create<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T, PostAuthor>): Promise<PostGeneric<T>> {
     const basePost: Post = {
       id: randomUUID(),
+      authorId: dto.authorId,
+      publishedAt: dto.publishedAt ? dto.publishedAt : new Date(),
       status: PostStatusEnum.PUBLISHED,
       isRepost: false,
       type: dto.type,
