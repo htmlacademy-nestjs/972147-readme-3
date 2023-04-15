@@ -9,8 +9,9 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "es2022",
-    "module": "esnext",
+    "module": "commonjs",
     "lib": ["es2017", "dom"],
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "noImplicitAny": true,
@@ -27,6 +28,7 @@
     "baseUrl": ".",
     "paths": {
       "@project/config/config-users": ["libs/config/config-users/src/index.ts"],
+      "@project/models/posts-models": ["libs/models/posts-models/src/index.ts"],
       "@project/shared/app-types": ["libs/shared/app-types/src/index.ts"],
       "@project/util/util-core": ["libs/util/util-core/src/index.ts"],
       "@project/util/util-types": ["libs/util/util-types/src/index.ts"]

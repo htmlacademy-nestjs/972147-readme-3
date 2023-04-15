@@ -1,22 +1,14 @@
-import { Post, PostStateEnum, PostTypeEnum } from "@project/shared/app-types";
+import { Post, PostStatusEnum } from "@project/shared/app-types";
 import { Expose } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 
-export abstract class PostRdo implements Post {
+export abstract class PostRdo implements Omit<Post, 'type'> {
   @ApiProperty({
     description: 'Unique identifier of the post',
-    example: '5ebc9b18-6564-4dec-b559-10402a71ab36'
+    example: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p'
   })
   @Expose()
   public id!: string;
-
-  @ApiProperty({
-    description: 'Type of the post',
-    enum: PostTypeEnum,
-    example: PostTypeEnum.TEXT,
-  })
-  @Expose()
-  public type!: PostTypeEnum;
 
   @ApiProperty({
     description: 'Post creation date',
@@ -33,12 +25,26 @@ export abstract class PostRdo implements Post {
   public updatedAt!: Date;
 
   @ApiProperty({
-    description: 'State of the post',
-    enum: PostStateEnum,
-    example: PostStateEnum.PUBLISHED,
+    description: 'Post publication date',
+    example: '2020-01-01T00:00:00.000Z'
   })
   @Expose()
-  public state!: PostStateEnum;
+  public publishedAt!: Date;
+
+  @ApiProperty({
+    description: 'Unique identifier of the author',
+    example: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p'
+  })
+  @Expose()
+  public authorId!: string;
+
+  @ApiProperty({
+    description: 'Status of the post',
+    enum: PostStatusEnum,
+    example: PostStatusEnum.PUBLISHED,
+  })
+  @Expose()
+  public status!: PostStatusEnum;
 
   @ApiProperty({
     description: 'Is post a repost',

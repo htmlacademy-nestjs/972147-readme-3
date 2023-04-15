@@ -1,6 +1,7 @@
 # Use for testing only
 
 version: '3.8'
+
 services:
   users.mongo:
     image: mongo
@@ -15,6 +16,15 @@ services:
     volumes:
       - mongo.users:/data/db
 
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/users --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+    networks:
+      - users.network
+
   users.mongo.ui:
     image: mongo-express
     restart: always
@@ -25,6 +35,12 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://admin:12345678@users.mongo:27017/
     depends_on:
       - users.mongo
+    networks:
+      - users.network
+
+networks:
+  users.network:
+    driver: bridge
 
 volumes:
   mongo.users:

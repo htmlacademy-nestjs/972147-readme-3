@@ -1,16 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BlogPostMemoryRepositoryFactory } from "./repositories/blog-post.memory.repository";
-import { Post, PostGeneric, PostStateEnum, PostTypeEnum } from "@project/shared/app-types";
-import { BlogPostEntityGeneric, createBlogPostEntity } from "./entities";
+import { PostTypeEnum } from "@project/shared/app-types";
 import { BlogPostDtoGeneric } from "./dto";
+import { BlogPostDbRepository } from "./repositories/blog-post.db.repository";
 
 @Injectable()
 export class BlogPostService {
-  constructor(private readonly factory: BlogPostMemoryRepositoryFactory) {
+  constructor(private readonly repository: BlogPostDbRepository) {
   }
 
-  public async getPost<T extends PostTypeEnum>(type: T, id: string) {
-    const post = await this.factory.getRepository(type).get(id);
+  public async getPost(id: string) {
+    const post = await this.repository.get(id);
 
     if (!post) {
       throw new NotFoundException();
@@ -19,39 +18,27 @@ export class BlogPostService {
     return post;
   }
 
-  public async createPost<T extends PostTypeEnum>(type: T, dto: BlogPostDtoGeneric<T>) {
-    const basePost: Post = {
-      id: '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      state: PostStateEnum.PUBLISHED,
-      isRepost: false,
-      likesCount: 0,
-      commentsCount: 0,
-      type: type,
-    };
-    const entity = createBlogPostEntity({...basePost, ...dto} as PostGeneric<T>) as BlogPostEntityGeneric<T>;
-    return await this.factory.getRepository(type).create(entity);
+  public async createPost<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>) {
+    return await this.repository.create({...dto, authorId: 'some author id'}); // TODO: get author id from context
   }
 
-  public async deletePost<T extends PostTypeEnum>(type: T, id: string) {
-    const post = await this.factory.getRepository(type).get(id);
+  public async deletePost(id: string) {
+    const post = await this.repository.get(id);
 
     if (!post) {
       throw new NotFoundException();
     }
 
-    await this.factory.getRepository(type).delete(id);
+    await this.repository.delete(id);
   }
 
-  public async updatePost<T extends PostTypeEnum>(type: T, id: string, dto: BlogPostDtoGeneric<T>) {
-    const post = await this.factory.getRepository(type).get(id);
+  public async updatePost<T extends PostTypeEnum>(id: string, dto: BlogPostDtoGeneric<T>) {
+    const post = await this.repository.get(id);
 
     if (!post) {
       throw new NotFoundException();
     }
 
-    const entity = createBlogPostEntity({...post, ...dto, updatedAt: new Date()} as PostGeneric<T>) as BlogPostEntityGeneric<T>;
-    return await this.factory.getRepository(type).update(id, entity);
+    return await this.repository.update(id, dto);
   }
 }

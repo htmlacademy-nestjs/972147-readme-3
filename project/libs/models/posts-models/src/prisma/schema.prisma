@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  authorId  String   @map("author_id")
+  postId    String   @map("post_id")
+  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([authorId, postId])
+  @@map("likes")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  authorId  String   @map("author_id")
+  postId    String   @map("post_id")
+  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  text      String
+
+  @@map("comments")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  name      String   @unique
+  posts     Post[]
+
+  @@map("tags")
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Post {
+  id               String     @id @default(uuid())
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @default(now()) @updatedAt @map("updated_at")
+  publishedAt      DateTime   @default(now()) @map("published_at")
+  authorId         String     @map("author_id")
+  status           PostStatus @default(PUBLISHED)
+  isRepost         Boolean    @default(false) @map("is_repost")
+  originalAuthorId String?    @map("original_author_id")
+  postImageId      String?    @unique @map("post_image_id")
+  postImage        PostImage? @relation(fields: [postImageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  postLinkId       String?    @unique @map("post_link_id")
+  postLink         PostLink?  @relation(fields: [postLinkId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  postQuoteId      String?    @unique @map("post_quote_id")
+  postQuote        PostQuote? @relation(fields: [postQuoteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  postTextId       String?    @unique @map("post_text_id")
+  postText         PostText?  @relation(fields: [postTextId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  postVideoId      String?    @unique @map("post_video_id")
+  postVideo        PostVideo? @relation(fields: [postVideoId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  likes            Like[]
+  comments         Comment[]
+  tags             Tag[]
+
+  @@map("posts")
+}
+
+model PostImage {
+  id       String @id @default(uuid())
+  imageUrl String @map("image_url")
+  Post     Post?
+
+  @@map("post_images")
+}
+
+model PostLink {
+  id          String  @id @default(uuid())
+  linkUrl     String  @map("link_url")
+  description String?
+  Post        Post?
+
+  @@map("post_links")
+}
+
+model PostQuote {
+  id          String @id @default(uuid())
+  text        String
+  quoteAuthor String @map("quote_author")
+  Post        Post?
+
+  @@map("post_quotes")
+}
+
+model PostText {
+  id           String @id @default(uuid())
+  name         String
+  announceText String @map("announce_text")
+  mainText     String @map("main_text")
+  Post         Post?
+
+  @@map("post_texts")
+}
+
+model PostVideo {
+  id      String @id @default(uuid())
+  name    String
+  linkUrl String @map("link_url")
+  Post    Post?
+
+  @@map("post_videos")
+}

@@ -1,0 +1,47 @@
+# Use for testing only
+
+version: '3.8'
+
+services:
+  posts.postgres:
+    image: postgres:14-alpine
+    container_name: posts.postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 12345678
+      POSTGRES_DB: posts
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres.posts:/var/lib/postgresql/data
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d test" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - posts.network
+
+  posts.pgadmin:
+    image: dpage/pgadmin4
+    container_name: posts.pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "test@localhost.local"
+      PGADMIN_DEFAULT_PASSWORD: "test"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "8082:80"
+    networks:
+      - posts.network
+    depends_on:
+      - posts.postgres
+
+volumes:
+  postgres.posts:
+
+networks:
+  posts.network:
+    driver: bridge

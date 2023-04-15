@@ -1,9 +1,9 @@
-export interface CrudRepository<Id, Entity, Result> {
+export interface CrudRepository<Id, CreateDTO, UpdateDTO, Result> {
   get(id: Id): Promise<Result | null>;
 
-  create(entity: Entity): Promise<Result>;
+  create(dto: CreateDTO): Promise<Result>;
 
-  update(id: Id, entity: Entity): Promise<Result>;
+  update(id: Id, dto: UpdateDTO): Promise<Result>;
 
   delete(id: Id): Promise<void>;
 }
