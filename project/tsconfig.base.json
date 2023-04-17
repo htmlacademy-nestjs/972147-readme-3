@@ -27,7 +27,9 @@
     "alwaysStrict": true,
     "baseUrl": ".",
     "paths": {
-      "@project/config/config-users": ["libs/config/config-users/src/index.ts"],
+      "@project/config/config-app": ["libs/config/config-app/src/index.ts"],
+      "@project/config/config-files": ["libs/config/config-files/src/index.ts"],
+      "@project/config/config-mongo": ["libs/config/config-mongo/src/index.ts"],
       "@project/models/posts-models": ["libs/models/posts-models/src/index.ts"],
       "@project/shared/app-types": ["libs/shared/app-types/src/index.ts"],
       "@project/util/util-core": ["libs/util/util-core/src/index.ts"],
