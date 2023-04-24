@@ -7,6 +7,7 @@ import { fillObject } from '@project/util/util-core';
 import { FileInfoRdo } from '../rdo/file-info.rdo';
 import { ApiBody, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { FileUploadDto } from '../dto/file-upload.dto';
+import { MongoidValidationPipe } from "@project/shared/shared-pipes";
 
 @ApiTags('Files')
 @Controller('files')
@@ -37,7 +38,7 @@ export class FileController {
   @ApiNotFoundResponse({
     description: 'File not found',
   })
-  public async getFileInfo(@Param('id') id: string) {
+  public async getFileInfo(@Param('id', MongoidValidationPipe) id: string) {
     const fileInfo = await this.fileService.findById(id);
     return fillObject(FileInfoRdo, fileInfo);
   }
@@ -49,7 +50,7 @@ export class FileController {
   @ApiNotFoundResponse({
     description: 'File not found',
   })
-  async downloadFile(@Param('id') id: string, @Res() res: Response) {
+  async downloadFile(@Param('id', MongoidValidationPipe) id: string, @Res() res: Response) {
     const file = await this.fileService.findById(id);
     const filestream = await this.fileService.downloadFile(id);
     if (!filestream) {
@@ -68,7 +69,7 @@ export class FileController {
     description: 'File has been successfully deleted.',
   })
   @Delete(':id')
-  public async deleteFile(@Param('id') id: string) {
+  public async deleteFile(@Param('id', MongoidValidationPipe) id: string) {
     await this.fileService.deleteFile(id);
   }
 }

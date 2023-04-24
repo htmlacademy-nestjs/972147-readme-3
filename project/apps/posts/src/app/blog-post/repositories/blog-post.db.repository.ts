@@ -84,7 +84,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
     return {
       ...this.mapDBPostToPost(dbPost),
       type: PostTypeEnum.IMAGE,
-      imageUrl: dbPostImage.imageUrl,
+      imageFileId: dbPostImage.imageFileId,
     };
   }
 
@@ -110,7 +110,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
   private mapDBPostLinkToPostLink(dbPost: DBPostWithCountJoin, dbPostLink: Omit<DBPostLink, 'id'>): PostLink {
     return {
       ...this.mapDBPostToPost(dbPost),
-      link: dbPostLink.linkUrl,
+      linkUrl: dbPostLink.linkUrl,
       description: dbPostLink.description ? dbPostLink.description : undefined,
       type: PostTypeEnum.LINK,
     };
@@ -119,7 +119,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
   private mapDBPostVideoToPostVideo(dbPost: DBPostWithCountJoin, dbPostLink: Omit<DBPostVideo, 'id'>): PostVideo {
     return {
       ...this.mapDBPostToPost(dbPost),
-      link: dbPostLink.linkUrl,
+      linkUrl: dbPostLink.linkUrl,
       name: dbPostLink.name,
       type: PostTypeEnum.VIDEO,
     };
@@ -151,11 +151,11 @@ export class BlogPostDbRepository implements BlogPostRepository {
 
   private prepareDbPostSchema<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>, type: 'create' | 'update') {
     return {
-      postImage: dto.type === PostTypeEnum.IMAGE ? { [type]: { imageUrl: dto.imageUrl } } : undefined,
+      postImage: dto.type === PostTypeEnum.IMAGE ? { [type]: { imageFileId: dto.imageFileId } } : undefined,
       postText: dto.type === PostTypeEnum.TEXT ? { [type]: { name: dto.name, announceText: dto.announceText, mainText: dto.mainText } } : undefined,
       postQuote: dto.type === PostTypeEnum.QUOTE ? { [type]: { quoteAuthor: dto.quoteAuthor, text: dto.text } } : undefined,
-      postLink: dto.type === PostTypeEnum.LINK ? { [type]: { linkUrl: dto.link, description: dto.description } } : undefined,
-      postVideo: dto.type === PostTypeEnum.VIDEO ? { [type]: { linkUrl: dto.link, name: dto.name } } : undefined,
+      postLink: dto.type === PostTypeEnum.LINK ? { [type]: { linkUrl: dto.linkUrl, description: dto.description } } : undefined,
+      postVideo: dto.type === PostTypeEnum.VIDEO ? { [type]: { linkUrl: dto.linkUrl, name: dto.name } } : undefined,
     };
   }
 

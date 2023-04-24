@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { UpdatePasswordDto } from "./dto/update-password.dto";
 import { BlogUserEntity } from "./blog-user.entity";
 import { BlogUserDbRepository } from "./repository/blog-user.db-repository";
+import { CreateUserDto } from "./dto/create-user.dto";
 
 @Injectable()
 export class BlogUserService {
@@ -33,5 +34,26 @@ export class BlogUserService {
     await this.blogUserRepository.delete(id);
 
     return user;
+  }
+
+  public async registerUser(dto: CreateUserDto) {
+    const existUser = await this.blogUserRepository.findByEmail(dto.email);
+    if (existUser) {
+      throw new ConflictException();
+    }
+    const userEntity = new BlogUserEntity({
+      id: '',
+      registeredAt: new Date(),
+      postsCount: 0,
+      subscribersCount: 0,
+      passwordHash: '',
+      email: dto.email,
+      firstName: dto.lastName,
+      avatarFileId: dto.avatarFileId,
+      lastName: dto.lastName
+    });
+
+    await userEntity.setPassword(dto.password);
+    return await this.blogUserRepository.create(userEntity);
   }
 }

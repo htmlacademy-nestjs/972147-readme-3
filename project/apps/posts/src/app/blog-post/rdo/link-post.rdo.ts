@@ -9,7 +9,7 @@ export class LinkPostRdo extends PostRdo {
     example: 'https://www.google.com'
   })
   @Expose()
-  public link!: string;
+  public linkUrl!: string;
 
   @ApiProperty({
     description: 'Description to link',

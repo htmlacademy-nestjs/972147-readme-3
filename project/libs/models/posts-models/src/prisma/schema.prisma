@@ -73,9 +73,9 @@ model Post {
 }
 
 model PostImage {
-  id       String @id @default(uuid())
-  imageUrl String @map("image_url")
-  Post     Post?
+  id          String @id @default(uuid())
+  imageFileId String @map("image_file_id")
+  Post        Post?
 
   @@map("post_images")
 }

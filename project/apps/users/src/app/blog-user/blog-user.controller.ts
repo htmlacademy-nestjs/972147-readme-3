@@ -7,8 +7,10 @@ import {
   ApiTags,
   ApiOkResponse,
   ApiNotFoundResponse,
-  ApiConflictResponse
+  ApiConflictResponse, ApiCreatedResponse
 } from "@nestjs/swagger";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { MongoidValidationPipe } from "@project/shared/shared-pipes";
 
 @ApiTags('Users')
 @Controller('users')
@@ -26,9 +28,24 @@ export class BlogUserController {
     description: 'User not found'
   })
   @Get(':id')
-  public async getUserById(@Param('id') id: string): Promise<UserRdo> {
+  public async getUserById(@Param('id', MongoidValidationPipe) id: string): Promise<UserRdo> {
     const user = await this.blogUserService.getUser(id);
     return fillObject(UserRdo, user);
+  }
+
+  @ApiCreatedResponse({
+    type: UserRdo,
+    description: 'User has been successfully registered.'
+  })
+  @ApiConflictResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'User with this email already exists'
+  })
+  @Post('')
+  @HttpCode(HttpStatus.CREATED)
+  public async create(@Body() dto: CreateUserDto): Promise<UserRdo> {
+    const newUser = await this.blogUserService.registerUser(dto)
+    return fillObject(UserRdo, newUser);
   }
 
   @ApiOkResponse({
@@ -42,7 +59,7 @@ export class BlogUserController {
   })
   @Post(':id/change-password')
   @HttpCode(HttpStatus.OK)
-  public async changePassword(@Body() dto: UpdatePasswordDto, @Param('id') id: string) {
+  public async changePassword(@Body() dto: UpdatePasswordDto, @Param('id', MongoidValidationPipe) id: string) {
     await this.blogUserService.updatePassword(id, dto);
     return undefined;
   }

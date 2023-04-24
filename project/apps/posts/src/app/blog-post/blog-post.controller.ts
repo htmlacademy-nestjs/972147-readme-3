@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from "@nestjs/common";
 import { BlogPostDtoGeneric, VideoPostDto, LinkPostDto, QuotePostDto, TextPostDto, ImagePostDto } from './dto';
 import { LinkPostRdo, QuotePostRdo, TextPostRdo, ImagePostRdo, VideoPostRdo, getBlogPostRdo } from './rdo';
 import { BlogPostService } from './blog-post.service';
 import { PostTypeEnum } from '@project/shared/app-types';
 import { fillObject } from '@project/util/util-core';
 import { ApiBody, ApiCreatedResponse, ApiExtraModels, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import { PostDtoValidationPipe } from "./pipes/post-dto-validation.pipe";
 
 const apiRdoModels = [LinkPostRdo, QuotePostRdo, TextPostRdo, ImagePostRdo, VideoPostRdo];
 const apiDtoModels = [LinkPostDto, QuotePostDto, TextPostDto, ImagePostDto, VideoPostDto];
@@ -31,7 +32,7 @@ export class BlogPostController {
     description: 'Post with given id and type not found',
   })
   @Get(':id')
-  public async getPost(@Param('id') id: string) {
+  public async getPost(@Param('id', ParseUUIDPipe) id: string) {
     const post = await this.service.getPost(id);
     return fillObject(getBlogPostRdo(post.type), post);
   }
@@ -45,8 +46,8 @@ export class BlogPostController {
     description: 'One of the post dto types',
   })
   @ApiParam({ name: 'type', enum: PostTypeEnum })
-  @Post('create')
-  public async createPost<T extends PostTypeEnum>(@Body() dto: BlogPostDtoGeneric<T>) {
+  @Post('')
+  public async createPost<T extends PostTypeEnum>(@Body(PostDtoValidationPipe) dto: BlogPostDtoGeneric<T>) {
     const post = await this.service.createPost(dto);
     return fillObject(getBlogPostRdo(post.type), post);
   }
@@ -59,9 +60,9 @@ export class BlogPostController {
     schema: oneofDtoSchemaResponse(),
     description: 'One of the post dto types',
   })
-  @Post(':id/update')
+  @Post(':id')
   @HttpCode(HttpStatus.OK)
-  public async updatePost<T extends PostTypeEnum>(@Param('id') id: string, @Body() dto: BlogPostDtoGeneric<T>) {
+  public async updatePost<T extends PostTypeEnum>(@Param('id', ParseUUIDPipe) id: string, @Body(PostDtoValidationPipe) dto: BlogPostDtoGeneric<T>) {
     const post = await this.service.updatePost(id, dto);
     return fillObject(getBlogPostRdo(post.type), post);
   }
@@ -73,7 +74,7 @@ export class BlogPostController {
     description: 'Post successfully deleted',
   })
   @Delete(':id')
-  public async deletePost(@Param('id') id: string) {
+  public async deletePost(@Param('id', ParseUUIDPipe) id: string) {
     await this.service.deletePost(id);
   }
 }

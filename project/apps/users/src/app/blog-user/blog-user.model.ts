@@ -22,7 +22,7 @@ export class BlogUserModel extends Document implements User {
   public email!: string;
 
   @Prop()
-  public avatar?: string;
+  public avatarFileId?: string;
 
   @Prop({ required: true })
   public registeredAt!: Date;

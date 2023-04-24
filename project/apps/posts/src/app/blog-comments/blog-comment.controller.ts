@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post } from "@nestjs/common";
 import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { BlogCommentsService } from './blog-comments.service';
 import { fillObject } from '@project/util/util-core';
@@ -19,7 +19,7 @@ export class BlogCommentController {
     description: 'Comment not found',
   })
   @Get(':id')
-  public async getComment(@Param('id') id: string): Promise<CommentRdo> {
+  public async getComment(@Param('id', ParseUUIDPipe) id: string): Promise<CommentRdo> {
     const comment = await this.service.getComment(id);
     return fillObject(CommentRdo, comment);
   }
@@ -39,7 +39,7 @@ export class BlogCommentController {
     description: 'Comment has been successfully updated.',
   })
   @Post(':id/update')
-  public async updateComment(@Param('id') id: string, @Body() dto: UpdateCommentDto) {
+  public async updateComment(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCommentDto) {
     const comment = await this.service.updateComment(id, dto);
     return fillObject(CommentRdo, comment);
   }
@@ -51,7 +51,7 @@ export class BlogCommentController {
     description: 'Comment has been successfully deleted.',
   })
   @Delete(':id')
-  public async deleteComment(@Param('id') id: string) {
+  public async deleteComment(@Param('id', ParseUUIDPipe) id: string) {
     await this.service.deleteComment(id);
   }
 
@@ -61,7 +61,7 @@ export class BlogCommentController {
     isArray: true,
   })
   @Get('post/:postId/list')
-  public async getCommentsList(@Param('postId') postId: string): Promise<CommentRdo[]> {
+  public async getCommentsList(@Param('postId', ParseUUIDPipe) postId: string): Promise<CommentRdo[]> {
     const comments = await this.service.getCommentsByPostId(postId);
     return comments.map((comment) => fillObject(CommentRdo, comment));
   }

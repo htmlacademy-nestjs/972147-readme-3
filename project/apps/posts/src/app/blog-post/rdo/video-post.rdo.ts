@@ -16,7 +16,7 @@ export class VideoPostRdo extends PostRdo {
     example: 'https://www.youtube.com/watch?v=QH2-TGUlwu4'
   })
   @Expose()
-  public link!: string;
+  public linkUrl!: string;
 
   @ApiProperty({
     description: 'Type of the post',

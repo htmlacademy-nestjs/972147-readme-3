@@ -10,7 +10,7 @@ export class BlogUserEntity extends User {
     this.lastName = user.lastName;
     this.passwordHash = user.passwordHash;
     this.email = user.email;
-    this.avatar = user.avatar;
+    this.avatarFileId = user.avatarFileId;
     this.registeredAt = user.registeredAt;
     this.postsCount = user.postsCount;
     this.subscribersCount = user.subscribersCount;

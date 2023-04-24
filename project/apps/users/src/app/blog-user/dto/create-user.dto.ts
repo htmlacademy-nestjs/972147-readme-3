@@ -1,33 +1,45 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { IsEmail, IsMongoId, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDto {
   @ApiProperty({
     description: 'User firstname',
     example: 'Ivan'
   })
+  @IsString()
+  @MinLength(2)
+  @MaxLength(50)
   public firstName!: string;
 
   @ApiProperty({
     description: 'User lastname',
     example: 'Ivanov'
   })
+  @MinLength(1)
+  @MaxLength(50)
   public lastName!: string;
 
   @ApiProperty({
-    description: 'User avatar link',
-    example: 'http://example.com/avatar.png'
+    description: 'User avatar id',
+    example: '5f9c1b9b9c9d1b1b8c8c8c8c'
   })
-  public avatar!: string;
+  @IsString()
+  @IsOptional()
+  public avatarFileId?: string;
 
   @ApiProperty({
     description: 'User email',
     example: 'test@example.com'
   })
+  @IsEmail()
   public email!: string;
 
   @ApiProperty({
     description: 'User password',
     example: '123456'
   })
+  @IsString()
+  @MinLength(6)
+  @MaxLength(12)
   public password!: string;
 }

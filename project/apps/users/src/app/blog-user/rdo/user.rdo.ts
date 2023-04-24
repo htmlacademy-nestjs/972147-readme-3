@@ -31,11 +31,11 @@ export class UserRdo {
   public email!: string;
 
   @ApiProperty({
-    description: 'User avatar URL',
-    example: 'http://example.com/avatar.png'
+    description: 'Avatar file id',
+    example: '5f9c1b9b9c9d1b1b8c8c8c8c'
   })
   @Expose()
-  public avatar?: string;
+  public avatarFileId?: string;
 
   @ApiProperty({
     description: 'User registration date',
