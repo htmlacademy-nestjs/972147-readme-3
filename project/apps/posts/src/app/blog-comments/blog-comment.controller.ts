@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { BlogCommentsService } from './blog-comments.service';
 import { fillObject } from '@project/util/util-core';
 import { CommentRdo } from './rdo/comment.rdo';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { BlogCommentQuery } from './query/blog-comment.query';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -60,9 +61,9 @@ export class BlogCommentController {
     description: 'Comments has been successfully retrieved.',
     isArray: true,
   })
-  @Get('post/:postId/list')
-  public async getCommentsList(@Param('postId', ParseUUIDPipe) postId: string): Promise<CommentRdo[]> {
-    const comments = await this.service.getCommentsByPostId(postId);
+  @Get('')
+  public async getCommentsList(@Query() query: BlogCommentQuery): Promise<CommentRdo[]> {
+    const comments = await this.service.getCommentsList(query);
     return comments.map((comment) => fillObject(CommentRdo, comment));
   }
 }

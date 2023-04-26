@@ -31,7 +31,7 @@ export class BlogUserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    await this.blogUserRepository.delete(id);
+    await this.blogUserRepository.get(id);
 
     return user;
   }
@@ -41,6 +41,7 @@ export class BlogUserService {
     if (existUser) {
       throw new ConflictException();
     }
+
     const userEntity = new BlogUserEntity({
       id: '',
       registeredAt: new Date(),
@@ -48,7 +49,7 @@ export class BlogUserService {
       subscribersCount: 0,
       passwordHash: '',
       email: dto.email,
-      firstName: dto.lastName,
+      firstName: dto.firstName,
       avatarFileId: dto.avatarFileId,
       lastName: dto.lastName
     });

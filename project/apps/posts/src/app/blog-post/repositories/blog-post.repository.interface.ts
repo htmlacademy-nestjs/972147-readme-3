@@ -1,10 +1,6 @@
 import { PostTypeEnum, PostGeneric, PostUnion } from "@project/shared/app-types";
 import { BlogPostDtoGeneric } from '../dto';
-
-export type ListBlogPostRepositoryParams = {
-  ids?: string[];
-  type?: PostTypeEnum;
-};
+import { BlogPostQuery } from "../query/blog-post.query";
 
 export type PostAuthor = {
   authorId: string;
@@ -19,5 +15,5 @@ export interface BlogPostRepository {
 
   delete(id: string): Promise<void>;
 
-  list(params: ListBlogPostRepositoryParams): Promise<PostUnion[]>;
+  list(query: BlogPostQuery): Promise<PostUnion[]>;
 }

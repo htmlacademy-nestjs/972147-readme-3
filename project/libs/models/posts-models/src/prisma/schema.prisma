@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../../../../../node_modules/.prisma/client"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -46,6 +47,14 @@ enum PostStatus {
   PUBLISHED
 }
 
+enum PostType {
+  IMAGE
+  LINK
+  QUOTE
+  TEXT
+  VIDEO
+}
+
 model Post {
   id               String     @id @default(uuid())
   createdAt        DateTime   @default(now()) @map("created_at")
@@ -53,6 +62,7 @@ model Post {
   publishedAt      DateTime   @default(now()) @map("published_at")
   authorId         String     @map("author_id")
   status           PostStatus @default(PUBLISHED)
+  type             PostType
   isRepost         Boolean    @default(false) @map("is_repost")
   originalAuthorId String?    @map("original_author_id")
   postImageId      String?    @unique @map("post_image_id")

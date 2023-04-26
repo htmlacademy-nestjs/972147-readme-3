@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from "@nestjs/common";
 import { BlogUserService } from "./blog-user.service";
 import { fillObject } from "@project/util/util-core";
 import { UserRdo } from "./rdo/user.rdo";
@@ -11,6 +11,7 @@ import {
 } from "@nestjs/swagger";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { MongoidValidationPipe } from "@project/shared/shared-pipes";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 @ApiTags('Users')
 @Controller('users')
@@ -28,6 +29,7 @@ export class BlogUserController {
     description: 'User not found'
   })
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   public async getUserById(@Param('id', MongoidValidationPipe) id: string): Promise<UserRdo> {
     const user = await this.blogUserService.getUser(id);
     return fillObject(UserRdo, user);
@@ -59,6 +61,7 @@ export class BlogUserController {
   })
   @Post(':id/change-password')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   public async changePassword(@Body() dto: UpdatePasswordDto, @Param('id', MongoidValidationPipe) id: string) {
     await this.blogUserService.updatePassword(id, dto);
     return undefined;

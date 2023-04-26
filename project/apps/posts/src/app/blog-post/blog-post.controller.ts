@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { BlogPostDtoGeneric, VideoPostDto, LinkPostDto, QuotePostDto, TextPostDto, ImagePostDto } from './dto';
 import { LinkPostRdo, QuotePostRdo, TextPostRdo, ImagePostRdo, VideoPostRdo, getBlogPostRdo } from './rdo';
 import { BlogPostService } from './blog-post.service';
 import { PostTypeEnum } from '@project/shared/app-types';
 import { fillObject } from '@project/util/util-core';
 import { ApiBody, ApiCreatedResponse, ApiExtraModels, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags, getSchemaPath } from '@nestjs/swagger';
-import { PostDtoValidationPipe } from "./pipes/post-dto-validation.pipe";
+import { PostDtoValidationPipe } from './pipes/post-dto-validation.pipe';
+import { BlogPostQuery } from './query/blog-post.query';
 
 const apiRdoModels = [LinkPostRdo, QuotePostRdo, TextPostRdo, ImagePostRdo, VideoPostRdo];
 const apiDtoModels = [LinkPostDto, QuotePostDto, TextPostDto, ImagePostDto, VideoPostDto];
@@ -16,6 +17,10 @@ const oneofRdoSchemaResponse = () => ({
 
 const oneofDtoSchemaResponse = () => ({
   oneOf: apiDtoModels.map((model) => ({ $ref: getSchemaPath(model) })),
+});
+
+const anyOfRdoSchemaResponse = () => ({
+  anyOf: apiRdoModels.map((model) => ({ $ref: getSchemaPath(model) })),
 });
 
 @ApiExtraModels(...apiDtoModels, ...apiRdoModels)
@@ -76,5 +81,15 @@ export class BlogPostController {
   @Delete(':id')
   public async deletePost(@Param('id', ParseUUIDPipe) id: string) {
     await this.service.deletePost(id);
+  }
+
+  @ApiOkResponse({
+    schema: anyOfRdoSchemaResponse(),
+    description: 'List of posts',
+    isArray: true
+  })
+  @Get('')
+  public async listPosts(@Query() query: BlogPostQuery) {
+    return await this.service.listPosts(query);
   }
 }

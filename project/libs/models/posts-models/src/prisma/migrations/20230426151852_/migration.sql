@@ -1,6 +1,9 @@
 -- CreateEnum
 CREATE TYPE "PostStatus" AS ENUM ('DRAFT', 'PUBLISHED');
 
+-- CreateEnum
+CREATE TYPE "PostType" AS ENUM ('IMAGE', 'LINK', 'QUOTE', 'TEXT', 'VIDEO');
+
 -- CreateTable
 CREATE TABLE "likes" (
     "id" TEXT NOT NULL,
@@ -41,6 +44,7 @@ CREATE TABLE "posts" (
     "published_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "author_id" TEXT NOT NULL,
     "status" "PostStatus" NOT NULL DEFAULT 'PUBLISHED',
+    "type" "PostType" NOT NULL,
     "is_repost" BOOLEAN NOT NULL DEFAULT false,
     "original_author_id" TEXT,
     "post_image_id" TEXT,
@@ -163,4 +167,4 @@ ALTER TABLE "posts"
         (post_link_id IS NOT NULL)::integer +
         (post_quote_id IS NOT NULL)::integer +
         (post_text_id IS NOT NULL)::integer +
-        (post_video_id IS NOT NULL)::integer = 1)
+        (post_video_id IS NOT NULL)::integer = 1);

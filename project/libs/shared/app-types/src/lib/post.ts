@@ -21,4 +21,6 @@ export abstract class Post {
   public likesCount!: number;
 
   public commentsCount!: number;
+
+  public tags!: string[];
 }
