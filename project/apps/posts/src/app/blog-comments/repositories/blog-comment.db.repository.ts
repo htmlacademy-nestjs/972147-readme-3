@@ -1,10 +1,11 @@
-import { BlogCommentRepositoryInterface, WithAuthorId } from "./blog-comment.repository.interface";
+import { BlogCommentRepositoryInterface, WithAuthorId } from './blog-comment.repository.interface';
 import { Injectable } from '@nestjs/common';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { Comment } from '@project/shared/app-types';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Comment as DBComment } from '@prisma/client';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
+import { BlogCommentQuery } from '../query/blog-comment.query';
 
 @Injectable()
 export class BlogCommentDbRepository implements BlogCommentRepositoryInterface {
@@ -36,7 +37,7 @@ export class BlogCommentDbRepository implements BlogCommentRepositoryInterface {
       data: {
         text: dto.text,
         postId: dto.postId,
-        authorId: dto.authorId
+        authorId: dto.authorId,
       },
     });
     return this.mapDbCommentToComment(dbComment);
@@ -54,8 +55,17 @@ export class BlogCommentDbRepository implements BlogCommentRepositoryInterface {
     await this.prisma.comment.delete({ where: { id } });
   }
 
-  public async list(postId: string): Promise<Comment[]> {
-    const dbComments = await this.prisma.comment.findMany({ where: { postId } });
+  public async list(query: BlogCommentQuery): Promise<Comment[]> {
+    const { postId, page, limit } = query;
+    const dbComments = await this.prisma.comment.findMany({
+      where: {
+        postId: {
+          equals: postId,
+        },
+      },
+      take: limit,
+      skip: page > 0 ? limit * (page - 1) : undefined,
+    });
     return dbComments.map(this.mapDbCommentToComment);
   }
 }

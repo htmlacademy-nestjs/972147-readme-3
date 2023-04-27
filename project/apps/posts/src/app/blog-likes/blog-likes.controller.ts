@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post } from "@nestjs/common";
+import { Controller, Delete, Get, Param, ParseUUIDPipe, Post } from "@nestjs/common";
 import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 import { BlogLikesService } from "./blog-likes.service";
 
@@ -16,7 +16,7 @@ export class BlogLikesController {
     description: 'Post has been successfully liked.',
   })
   @Post('post/:postId/like')
-  public async likePost(@Param('postId') postId: string) {
+  public async likePost(@Param('postId', ParseUUIDPipe) postId: string) {
     await this.service.likePost(postId);
   }
 
@@ -27,7 +27,7 @@ export class BlogLikesController {
     description: 'Post has been successfully unliked.',
   })
   @Delete('post/:postId/unlike')
-  public async unlikePost(@Param('postId') postId: string) {
+  public async unlikePost(@Param('postId', ParseUUIDPipe) postId: string) {
     await this.service.unlikePost(postId);
   }
 }

@@ -5,11 +5,11 @@ import { PostTypeEnum } from "@project/shared/app-types";
 
 export class ImagePostRdo extends PostRdo {
   @ApiProperty({
-    description: 'Link to image',
-    example: 'https://example.com/image.png'
+    description: 'Image file id',
+    example: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p'
   })
   @Expose()
-  public imageUrl!: string;
+  public imageFileId!: string;
 
   @ApiProperty({
     description: 'Type of the post',

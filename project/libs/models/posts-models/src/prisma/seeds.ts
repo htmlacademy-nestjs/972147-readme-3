@@ -12,7 +12,7 @@ async function fillDb() {
       authorId: fakeAuthorId,
       postImage: {
         create: {
-          imageUrl: 'https://picsum.photos/200/300',
+          imageFileId: 'fakeImageFileId',
         },
       },
     },

@@ -1,0 +1,1 @@
+export const MAX_LOGINED_DEVICES_PER_USER = 5;

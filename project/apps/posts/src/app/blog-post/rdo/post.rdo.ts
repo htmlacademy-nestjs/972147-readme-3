@@ -66,4 +66,11 @@ export abstract class PostRdo implements Omit<Post, 'type'> {
   })
   @Expose()
   public commentsCount!: number;
+
+  @ApiProperty({
+    description: 'Tags of the post',
+    example: ['django', 'python'],
+  })
+  @Expose()
+  public tags!: string[];
 }

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { BlogCommentDbRepository } from './repositories/blog-comment.db.repository';
+import { BlogCommentQuery } from "./query/blog-comment.query";
 
 @Injectable()
 export class BlogCommentsService {
@@ -41,7 +42,7 @@ export class BlogCommentsService {
     return await this.repository.update(id, dto);
   }
 
-  public async getCommentsByPostId(postId: string) {
-    return await this.repository.list(postId);
+  public async getCommentsList(query: BlogCommentQuery) {
+    return await this.repository.list(query);
   }
 }

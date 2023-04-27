@@ -10,3 +10,5 @@ export * from './lib/post.type.enum';
 export * from './lib/post.generic';
 export * from './lib/tag';
 export * from './lib/user';
+export * from './lib/file-info';
+export * from './lib/token-payload';

@@ -1,0 +1,46 @@
+# Use for testing only
+
+version: '3.8'
+
+services:
+  files.mongo:
+    image: mongo
+    restart: always
+    container_name: files.mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 12345678
+      MONGO_INITDB_DATABASE: files
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo.files:/data/db
+
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27018/files --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+    networks:
+      - files.network
+
+  users.mongo.ui:
+    image: mongo-express
+    restart: always
+    container_name: files.mongo.ui
+    ports:
+      - "8083:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://admin:12345678@files.mongo:27017/
+    depends_on:
+      - files.mongo
+    networks:
+      - files.network
+
+networks:
+  files.network:
+    driver: bridge
+
+volumes:
+  mongo.files:

@@ -4,7 +4,7 @@ export abstract class User {
   public lastName!: string;
   public passwordHash!: string;
   public email!: string;
-  public avatar?: string;
+  public avatarFileId?: string;
   public registeredAt!: Date;
   public postsCount!: number;
   public subscribersCount!: number;
