@@ -18,28 +18,27 @@ export class BlogCommentsService {
     return comment;
   }
 
-  public async createComment(dto: CreateCommentDto) {
-    return await this.repository.create({ ...dto, authorId: 'some author id' }); // TODO: get author id from context
+  public async createComment(authorId: string, dto: CreateCommentDto) {
+    return await this.repository.create({ ...dto, authorId });
   }
 
-  public async deleteComment(id: string) {
-    const comment = this.repository.get(id);
+  public async deleteComment(authorId: string, commentId: string) {
+    const comment = await this.repository.get(commentId);
 
-    if (!comment) {
-      throw new NotFoundException();
+    if (comment?.authorId === authorId) {
+      await this.repository.delete(commentId);
     }
 
-    await this.repository.delete(id);
+    throw new NotFoundException();
   }
 
-  public async updateComment(id: string, dto: UpdateCommentDto) {
-    const comment = this.repository.get(id);
+  public async updateComment(authorId: string, id: string, dto: UpdateCommentDto) {
+    const comment = await this.repository.get(id);
 
-    if (!comment) {
-      throw new NotFoundException();
+    if (comment?.authorId === authorId) {
+      return await this.repository.update(id, dto);
     }
-
-    return await this.repository.update(id, dto);
+    throw new NotFoundException();
   }
 
   public async getCommentsList(query: BlogCommentQuery) {

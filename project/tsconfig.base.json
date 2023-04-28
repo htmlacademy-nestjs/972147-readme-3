@@ -30,8 +30,10 @@
       "@project/config/config-app": ["libs/config/config-app/src/index.ts"],
       "@project/config/config-jwt": ["libs/config/config-jwt/src/index.ts"],
       "@project/config/config-mongo": ["libs/config/config-mongo/src/index.ts"],
+      "@project/config/config-users": ["libs/config/config-users/src/index.ts"],
       "@project/models/posts-models": ["libs/models/posts-models/src/index.ts"],
       "@project/shared/app-types": ["libs/shared/app-types/src/index.ts"],
+      "@project/shared/shared-decorators": ["libs/shared/shared-decorators/src/index.ts"],
       "@project/shared/shared-pipes": ["libs/shared/shared-pipes/src/index.ts"],
       "@project/util/util-core": ["libs/util/util-core/src/index.ts"],
       "@project/util/util-types": ["libs/util/util-types/src/index.ts"]

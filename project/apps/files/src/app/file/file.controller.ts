@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express, Response } from 'express';
 import 'multer';
@@ -8,6 +8,9 @@ import { FileInfoRdo } from '../rdo/file-info.rdo';
 import { ApiBody, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { FileUploadDto } from '../dto/file-upload.dto';
 import { MongoidValidationPipe } from "@project/shared/shared-pipes";
+import { AuthAccessGuard } from "../auth/guards/auth-access.guard";
+import { ExtractUser } from "@project/shared/shared-decorators";
+import { User } from "@project/shared/app-types";
 
 @ApiTags('Files')
 @Controller('files')
@@ -24,9 +27,10 @@ export class FileController {
     type: FileInfoRdo,
     description: 'Info about uploaded file',
   })
+  @UseGuards(AuthAccessGuard)
   @UseInterceptors(FileInterceptor('file'))
-  public async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    const fileInfo = await this.fileService.writeFile(file);
+  public async uploadFile(@UploadedFile() file: Express.Multer.File, @ExtractUser() user: User) {
+    const fileInfo = await this.fileService.writeFile(user.id, file);
     return fillObject(FileInfoRdo, fileInfo);
   }
 
@@ -68,8 +72,9 @@ export class FileController {
   @ApiOkResponse({
     description: 'File has been successfully deleted.',
   })
+  @UseGuards(AuthAccessGuard)
   @Delete(':id')
-  public async deleteFile(@Param('id', MongoidValidationPipe) id: string) {
-    await this.fileService.deleteFile(id);
+  public async deleteFile(@Param('id', MongoidValidationPipe) fileId: string, @ExtractUser() user: User) {
+    await this.fileService.deleteFile(user.id, fileId);
   }
 }

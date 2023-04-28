@@ -9,7 +9,7 @@ import { MongoidValidationPipe } from '@project/shared/shared-pipes';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { TokenPayload } from '@project/shared/app-types';
-import { LoggedUserRdo } from './rdo/logged-user.rdo';
+import { ExtractUser } from "@project/shared/shared-decorators";
 
 @ApiTags('Users')
 @Controller('users')
@@ -17,8 +17,8 @@ export class BlogUserController {
   constructor(private readonly blogUserService: BlogUserService) {}
 
   @ApiOkResponse({
-    type: LoggedUserRdo,
-    description: '',
+    type: UserRdo,
+    description: 'User has been successfully retrieved.',
   })
   @ApiBadRequestResponse({
     description: 'User not provided or invalid data',
@@ -26,10 +26,10 @@ export class BlogUserController {
   @Get('/profile')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  public async injectUserFromToken(@Req() req: Request): Promise<LoggedUserRdo> {
-    const user = req.user as TokenPayload | undefined;
-    if (user && user.sub && user.email && user.firstName && user.lastName) {
-      return fillObject(LoggedUserRdo, { ...user, id: user.sub });
+  public async getLoggedUserProfile(@ExtractUser() user: TokenPayload | undefined): Promise<UserRdo> {
+    if (user?.sub) {
+      const loggedUser = await this.blogUserService.getUser(user.sub);
+      return fillObject(UserRdo, loggedUser);
     }
     throw new BadRequestException('User not provided or invalid data');
   }
@@ -78,9 +78,8 @@ export class BlogUserController {
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  public async changePassword(@Body() dto: UpdatePasswordDto, @Req() req: Request) {
-    const user = req.user as TokenPayload | undefined;
-    if (!user) {
+  public async changePassword(@Body() dto: UpdatePasswordDto, @ExtractUser() user: TokenPayload | undefined): Promise<void> {
+    if (!user?.sub) {
       throw new BadRequestException('User not provided');
     }
     await this.blogUserService.updatePassword(user.sub, dto);

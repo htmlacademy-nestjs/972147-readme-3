@@ -36,8 +36,8 @@ export class AuthService {
     return blogUserEntity.toObject();
   }
 
-  private async createUserTokens({ id, email, firstName, lastName }: User) {
-    const payload: TokenPayload = { sub: id, email, firstName, lastName };
+  private async createUserTokens({ id }: User) {
+    const payload: TokenPayload = { sub: id };
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('jwt.accessTokenSecret'),
       expiresIn: this.configService.get<string>('jwt.accessTokenExpiresIn'),

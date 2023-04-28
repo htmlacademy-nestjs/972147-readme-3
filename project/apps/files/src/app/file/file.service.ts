@@ -46,10 +46,10 @@ export class FileService {
     return files[0];
   }
 
-  public async writeFile(file: Express.Multer.File, metadata: Record<string, unknown> = {}): Promise<FileInfo> {
+  public async writeFile(userId: string, file: Express.Multer.File): Promise<FileInfo> {
     const fileInfo = await this.writeFileStream(Readable.from(file.buffer), file.originalname, {
       contentType: file.mimetype,
-      metadata: { ...metadata },
+      metadata: { userId },
     });
 
     return {
@@ -64,8 +64,11 @@ export class FileService {
     return this.bucket.openDownloadStream(new ObjectId(id));
   }
 
-  public async deleteFile(id: string) {
-    const file = await this.findById(id);
+  public async deleteFile(userId: string, fileId: string) {
+    const file = await this.findById(fileId);
+    if (file.metadata?.userId !== userId) {
+      throw new NotFoundException();
+    }
     return this.bucket.delete(file._id);
   }
 }

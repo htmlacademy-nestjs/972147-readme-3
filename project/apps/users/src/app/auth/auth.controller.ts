@@ -1,12 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards, Get } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { fillObject } from '@project/util/util-core';
 import { LoginUserRdo } from './rdo/login-user.rdo';
 import { ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { Request } from 'express';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ExtractUser } from '@project/shared/shared-decorators';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -37,9 +36,8 @@ export class AuthController {
   @Get('refresh-token')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
-  public async refreshToken(@Req() req: Request) {
-    const user = req.user as { refreshToken: string };
-    const tokens = await this.authService.loginByRefreshToken(user.refreshToken);
+  public async refreshToken(@ExtractUser() { refreshToken }: { refreshToken: string }): Promise<LoginUserRdo> {
+    const tokens = await this.authService.loginByRefreshToken(refreshToken);
     return fillObject(LoginUserRdo, tokens);
   }
 
@@ -52,9 +50,8 @@ export class AuthController {
   @Get('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
-  public async logout(@Req() req: Request) {
-    const user = req.user as { refreshToken: string };
-    await this.authService.logout(user.refreshToken);
+  public async logout(@ExtractUser() { refreshToken }: { refreshToken: string }) {
+    await this.authService.logout(refreshToken);
   }
 
   @ApiUnauthorizedResponse({
@@ -66,8 +63,7 @@ export class AuthController {
   @Get('logout-all')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
-  public async logoutAll(@Req() req: Request) {
-    const user = req.user as { refreshToken: string };
-    await this.authService.logoutAll(user.refreshToken);
+  public async logoutAll(@ExtractUser() { refreshToken }: { refreshToken: string }) {
+    await this.authService.logoutAll(refreshToken);
   }
 }

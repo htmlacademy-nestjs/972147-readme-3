@@ -5,11 +5,11 @@ import { BlogLikesDbRepository } from "./repositories/blog-likes.db.repository";
 export class BlogLikesService {
   constructor(private readonly repository: BlogLikesDbRepository) {}
 
-  public async likePost(postId: string) {
-    await this.repository.create({ authorId: 'Some author id', postId }); //TODO: get author id from context
+  public async likePost(authorId: string, postId: string) {
+    await this.repository.create({ authorId, postId });
   }
 
-  public async unlikePost(postId: string) {
-    await this.repository.delete({ authorId: 'SOme author id', postId }); //TODO: get author id from context
+  public async unlikePost(authorId: string, postId: string) {
+    await this.repository.delete({ authorId, postId });
   }
 }
