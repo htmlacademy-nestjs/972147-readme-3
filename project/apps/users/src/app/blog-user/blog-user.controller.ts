@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { BlogUserService } from './blog-user.service';
 import { fillObject } from '@project/util/util-core';
 import { UserRdo } from './rdo/user.rdo';
@@ -7,14 +7,14 @@ import { ApiTags, ApiOkResponse, ApiNotFoundResponse, ApiConflictResponse, ApiCr
 import { CreateUserDto } from './dto/create-user.dto';
 import { MongoidValidationPipe } from '@project/shared/shared-pipes';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Request } from 'express';
 import { TokenPayload } from '@project/shared/app-types';
-import { ExtractUser } from "@project/shared/shared-decorators";
+import { ExtractUser } from '@project/shared/shared-decorators';
+import { NotifyService } from '../notify/notify.service';
 
 @ApiTags('Users')
 @Controller('users')
 export class BlogUserController {
-  constructor(private readonly blogUserService: BlogUserService) {}
+  constructor(private readonly blogUserService: BlogUserService, private readonly notifyService: NotifyService) {}
 
   @ApiOkResponse({
     type: UserRdo,
@@ -60,6 +60,8 @@ export class BlogUserController {
   @HttpCode(HttpStatus.CREATED)
   public async create(@Body() dto: CreateUserDto): Promise<UserRdo> {
     const newUser = await this.blogUserService.registerUser(dto);
+    const { email, firstname, lastname } = newUser;
+    await this.notifyService.registerSubscriber({ email, firstname, lastname });
     return fillObject(UserRdo, newUser);
   }
 
@@ -83,5 +85,25 @@ export class BlogUserController {
       throw new BadRequestException('User not provided');
     }
     await this.blogUserService.updatePassword(user.sub, dto);
+  }
+
+  @ApiOkResponse({
+    description: 'Email notifications has been successfully unsubscribed',
+  })
+  @ApiBadRequestResponse({
+    description: 'User not provided or invalid data',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
+  @Post('unsubscribe')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  public async unsubscribeEmailNotifications(@ExtractUser() token: TokenPayload | undefined): Promise<void> {
+    if (!token?.sub) {
+      throw new BadRequestException('User not provided');
+    }
+    const { email, firstname, lastname } = await this.blogUserService.getUser(token.sub);
+    await this.notifyService.unregisterSubscriber({ email, firstname, lastname });
   }
 }

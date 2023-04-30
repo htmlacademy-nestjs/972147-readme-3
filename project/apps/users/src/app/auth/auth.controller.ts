@@ -6,6 +6,8 @@ import { LoginUserRdo } from './rdo/login-user.rdo';
 import { ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { ExtractUser } from '@project/shared/shared-decorators';
+import { TokenPayload } from "@project/shared/app-types";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -36,8 +38,8 @@ export class AuthController {
   @Get('refresh-token')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
-  public async refreshToken(@ExtractUser() { refreshToken }: { refreshToken: string }): Promise<LoginUserRdo> {
-    const tokens = await this.authService.loginByRefreshToken(refreshToken);
+  public async refreshToken(@ExtractUser() user: TokenPayload): Promise<LoginUserRdo> {
+    const tokens = await this.authService.loginByRefreshToken(user);
     return fillObject(LoginUserRdo, tokens);
   }
 
@@ -49,9 +51,9 @@ export class AuthController {
   })
   @Get('logout')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtRefreshGuard)
-  public async logout(@ExtractUser() { refreshToken }: { refreshToken: string }) {
-    await this.authService.logout(refreshToken);
+  @UseGuards(JwtAuthGuard)
+  public async logout(@ExtractUser() user: TokenPayload) {
+    await this.authService.logout(user);
   }
 
   @ApiUnauthorizedResponse({
@@ -62,8 +64,8 @@ export class AuthController {
   })
   @Get('logout-all')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtRefreshGuard)
-  public async logoutAll(@ExtractUser() { refreshToken }: { refreshToken: string }) {
-    await this.authService.logoutAll(refreshToken);
+  @UseGuards(JwtAuthGuard)
+  public async logoutAll(@ExtractUser() user: TokenPayload) {
+    await this.authService.logoutAll(user);
   }
 }

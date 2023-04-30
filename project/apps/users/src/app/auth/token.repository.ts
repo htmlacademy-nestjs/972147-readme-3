@@ -12,16 +12,8 @@ export class TokenRepository {
     return newToken.save();
   }
 
-  public async findByHash(tokenHash: string): Promise<TokenModelInterface | null> {
-    return this.tokenModel.findOne({ refreshTokenHash: tokenHash }).exec();
-  }
-
-  public async updateHash(oldHash: string, newHash: string): Promise<TokenModelInterface> {
-    const token = await this.tokenModel.findOneAndUpdate({ refreshTokenHash: oldHash }, { refreshTokenHash: newHash }, { new: true }).exec();
-    if (!token) {
-      throw new Error('Token not found');
-    }
-    return token;
+  public async findByRefreshTokenId(refreshTokenId: string): Promise<TokenModelInterface | null> {
+    return this.tokenModel.findOne({ refreshTokenId }).exec();
   }
 
   public async findAllByUserId(userId: string): Promise<TokenModelInterface[]> {
@@ -32,7 +24,7 @@ export class TokenRepository {
     await this.tokenModel.deleteMany({ userId }).exec();
   }
 
-  public async deleteOne(tokenHash: string): Promise<void> {
-    await this.tokenModel.deleteOne({ refreshTokenHash: tokenHash }).exec();
+  public async deleteOneByRefreshTokenId(refreshTokenId: string): Promise<void> {
+    await this.tokenModel.deleteOne({ refreshTokenId }).exec();
   }
 }

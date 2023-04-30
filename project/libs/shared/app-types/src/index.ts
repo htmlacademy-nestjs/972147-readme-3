@@ -8,6 +8,8 @@ export * from './lib/post-text';
 export * from './lib/post.status.enum';
 export * from './lib/post.type.enum';
 export * from './lib/post.generic';
+export * from './lib/rabbitmq-routing.enum';
+export * from './lib/subscriber';
 export * from './lib/tag';
 export * from './lib/user';
 export * from './lib/file-info';

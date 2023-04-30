@@ -6,8 +6,8 @@ export class BlogUserEntity extends User {
   constructor(user: User) {
     super();
     this.id = user.id;
-    this.firstName = user.firstName;
-    this.lastName = user.lastName;
+    this.firstname = user.firstname;
+    this.lastname = user.lastname;
     this.passwordHash = user.passwordHash;
     this.email = user.email;
     this.avatarFileId = user.avatarFileId;

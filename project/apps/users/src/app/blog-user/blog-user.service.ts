@@ -49,9 +49,9 @@ export class BlogUserService {
       subscribersCount: 0,
       passwordHash: '',
       email: dto.email,
-      firstName: dto.firstName,
+      firstname: dto.firstname,
       avatarFileId: dto.avatarFileId,
-      lastName: dto.lastName
+      lastname: dto.lastname
     });
 
     await userEntity.setPassword(dto.password);

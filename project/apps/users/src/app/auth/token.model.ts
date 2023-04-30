@@ -4,7 +4,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 export interface TokenModelInterface {
   userId: string;
 
-  refreshTokenHash: string;
+  refreshTokenId: string;
 
   expiresAt: Date;
 
@@ -12,7 +12,7 @@ export interface TokenModelInterface {
 }
 
 @Schema({
-  collection: "tokens",
+  collection: "token-sessions",
   timestamps: true
 })
 export class TokenModel extends Document implements TokenModelInterface {
@@ -20,7 +20,7 @@ export class TokenModel extends Document implements TokenModelInterface {
   public userId!: string;
 
   @Prop({ required: true, unique: true })
-  public refreshTokenHash!: string;
+  public refreshTokenId!: string;
 
   @Prop({ required: true })
   public expiresAt!: Date;

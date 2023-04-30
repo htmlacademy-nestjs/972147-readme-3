@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
+import { CacheModule } from "@nestjs/cache-manager";
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { BlogUserModule } from '../blog-user/blog-user.module';
@@ -8,6 +9,7 @@ import { JwtRefreshStrategy } from "./strategies/jwt-refresh.strategy";
 import { MongooseModule } from "@nestjs/mongoose";
 import { TokenSchema, TokenModel } from "./token.model";
 import { TokenRepository } from "./token.repository";
+import { getRedisOptions } from "@project/config/config-redis";
 
 @Module({
   imports: [
@@ -15,7 +17,8 @@ import { TokenRepository } from "./token.repository";
     JwtModule.register({}),
     MongooseModule.forFeature([
       { name: TokenModel.name, schema: TokenSchema }
-    ])
+    ]),
+    CacheModule.registerAsync(getRedisOptions())
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtAccessStrategy, JwtRefreshStrategy, TokenRepository],

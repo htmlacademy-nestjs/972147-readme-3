@@ -10,10 +10,10 @@ export class BlogUserModel extends Document implements User {
   public id!: string;
 
   @Prop({ required: true })
-  public firstName!: string;
+  public firstname!: string;
 
   @Prop({ required: true })
-  public lastName!: string;
+  public lastname!: string;
 
   @Prop({ required: true })
   public passwordHash!: string;

@@ -14,14 +14,14 @@ export class UserRdo {
     example: 'Ivan'
   })
   @Expose()
-  public firstName!: string;
+  public firstname!: string;
 
   @ApiProperty({
     description: 'User lastname',
     example: 'Ivanov'
   })
   @Expose()
-  public lastName!: string;
+  public lastname!: string;
 
   @ApiProperty({
     description: 'User email',

@@ -9,7 +9,7 @@ export class CreateUserDto {
   @IsString()
   @MinLength(2)
   @MaxLength(50)
-  public firstName!: string;
+  public firstname!: string;
 
   @ApiProperty({
     description: 'User lastname',
@@ -17,7 +17,7 @@ export class CreateUserDto {
   })
   @MinLength(1)
   @MaxLength(50)
-  public lastName!: string;
+  public lastname!: string;
 
   @ApiProperty({
     description: 'User avatar id',
