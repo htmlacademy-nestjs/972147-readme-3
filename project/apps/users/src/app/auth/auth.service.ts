@@ -69,7 +69,7 @@ export class AuthService {
     return decoded as Required<TokenPayload>;
   }
 
-  private async validateRefreshToken(refreshTokenId: string) {
+  public async validateRefreshToken(refreshTokenId: string) {
     const token = await this.tokenRepository.findByRefreshTokenId(refreshTokenId);
     if (!token) {
       throw new UnauthorizedException();
@@ -98,11 +98,15 @@ export class AuthService {
     await this.cacheManager.set(payload.accessTokenId, payload.sub, (payload.exp - payload.iat) * 1000);
   }
 
-  public async validateAccessToken(payload: TokenPayload) {
-    const cachedToken = await this.cacheManager.get(payload.accessTokenId);
+  public async validateAccessToken(accessTokenId: string) {
+    const cachedToken = await this.cacheManager.get(accessTokenId);
     if (!cachedToken) {
       throw new UnauthorizedException();
     }
+  }
+
+  public async deleteAccessToken(accessTokenId: string) {
+    await this.cacheManager.del(accessTokenId);
   }
 
   public async login(dto: LoginUserDto) {
@@ -115,25 +119,24 @@ export class AuthService {
   }
 
   public async loginByRefreshToken(payload: TokenPayload) {
-    await this.validateRefreshToken(payload.refreshTokenId);
     const user = await this.blogUserRepository.get(payload.sub);
     if (!user) {
       throw new BadRequestException();
     }
     const tokens = await this.createUserTokens(user);
-    await this.cacheManager.del(payload.accessTokenId);
+    await this.deleteAccessToken(payload.accessTokenId);
     await this.updateRefreshToken(payload.refreshTokenId, tokens.refreshToken);
     await this.saveAccessToken(tokens.accessToken);
     return tokens;
   }
 
   public async logoutAll(payload: TokenPayload) {
-    await this.cacheManager.del(payload.accessTokenId);
+    await this.deleteAccessToken(payload.accessTokenId);
     await this.tokenRepository.deleteAllByUserId(payload.sub);
   }
 
   public async logout(payload: TokenPayload) {
-    await this.cacheManager.del(payload.accessTokenId);
+    await this.deleteAccessToken(payload.accessTokenId);
     await this.tokenRepository.deleteOneByRefreshTokenId(payload.refreshTokenId);
   }
 }
