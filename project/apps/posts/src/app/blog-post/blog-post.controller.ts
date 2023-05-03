@@ -1,14 +1,23 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { BlogPostDtoGeneric, VideoPostDto, LinkPostDto, QuotePostDto, TextPostDto, ImagePostDto } from './dto';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { BlogPostDtoGeneric, VideoPostDto, LinkPostDto, QuotePostDto, TextPostDto, ImagePostDto, DeletePostDto } from './dto';
 import { LinkPostRdo, QuotePostRdo, TextPostRdo, ImagePostRdo, VideoPostRdo, getBlogPostRdo } from './rdo';
 import { BlogPostService } from './blog-post.service';
-import { PostTypeEnum, User } from '@project/shared/app-types';
+import { PostTypeEnum } from '@project/shared/app-types';
 import { fillObject } from '@project/util/util-core';
-import { ApiBody, ApiCreatedResponse, ApiExtraModels, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiExtraModels,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { PostDtoValidationPipe } from './pipes/post-dto-validation.pipe';
 import { BlogPostQuery } from './query/blog-post.query';
-import { AuthAccessGuard } from '../blog-auth/guards/auth-access.guard';
-import { ExtractUser } from '@project/shared/shared-decorators';
+import { CreateRepostDto } from './dto/create-repost.dto';
+import { AuthorPostsCountRdo } from './rdo/author-posts-count.rdo';
 
 const apiRdoModels = [LinkPostRdo, QuotePostRdo, TextPostRdo, ImagePostRdo, VideoPostRdo];
 const apiDtoModels = [LinkPostDto, QuotePostDto, TextPostDto, ImagePostDto, VideoPostDto];
@@ -52,12 +61,35 @@ export class BlogPostController {
     schema: oneofDtoSchemaResponse(),
     description: 'One of the post dto types',
   })
-  @ApiParam({ name: 'type', enum: PostTypeEnum })
-  @UseGuards(AuthAccessGuard)
   @Post('')
-  public async createPost<T extends PostTypeEnum>(@Body(PostDtoValidationPipe) dto: BlogPostDtoGeneric<T>, @ExtractUser() user: User) {
-    const post = await this.service.createPost(user.id, dto);
+  public async createPost<T extends PostTypeEnum>(@Body(PostDtoValidationPipe) dto: BlogPostDtoGeneric<T>) {
+    const post = await this.service.createPost(dto);
     return fillObject(getBlogPostRdo(post.type), post);
+  }
+
+  @ApiNotFoundResponse({
+    description: 'Post with given id and type not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Post is already reposted',
+  })
+  @ApiCreatedResponse({
+    schema: oneofRdoSchemaResponse(),
+    description: 'One of the post rdo types',
+  })
+  @Post('repost')
+  public async createRepost(@Body() dto: CreateRepostDto) {
+    const repost = await this.service.createRepost(dto);
+    return fillObject(getBlogPostRdo(repost.type), repost);
+  }
+
+  @ApiOkResponse({
+    type: AuthorPostsCountRdo,
+  })
+  @Get('get-count-posts/:authorId')
+  public async getCountPosts(@Param('authorId') authorId: string) {
+    const countPosts = await this.service.getPostsCountByAuthorId(authorId);
+    return fillObject(AuthorPostsCountRdo, { countPosts });
   }
 
   @ApiOkResponse({
@@ -69,27 +101,29 @@ export class BlogPostController {
     description: 'One of the post dto types',
   })
   @Post(':id')
-  @UseGuards(AuthAccessGuard)
   @HttpCode(HttpStatus.OK)
-  public async updatePost<T extends PostTypeEnum>(
-    @Param('id', ParseUUIDPipe) postId: string,
-    @Body(PostDtoValidationPipe) dto: BlogPostDtoGeneric<T>,
-    @ExtractUser() user: User
-  ) {
-    const post = await this.service.updatePost(user.id, postId, dto);
+  public async updatePost<T extends PostTypeEnum>(@Param('id', ParseUUIDPipe) postId: string, @Body(PostDtoValidationPipe) dto: BlogPostDtoGeneric<T>) {
+    const post = await this.service.updatePost(postId, dto);
     return fillObject(getBlogPostRdo(post.type), post);
   }
 
+  @ApiBody({
+    type: DeletePostDto,
+    description: 'Delete post dto',
+  })
   @ApiNotFoundResponse({
     description: 'Post with given id and type not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Author id and post id do not match',
   })
   @ApiOkResponse({
     description: 'Post successfully deleted',
   })
-  @UseGuards(AuthAccessGuard)
-  @Delete(':id')
-  public async deletePost(@Param('id', ParseUUIDPipe) postId: string, @ExtractUser() user: User) {
-    await this.service.deletePost(user.id, postId);
+  @HttpCode(HttpStatus.OK)
+  @Post('delete')
+  public async deletePost(@Body() dto: DeletePostDto) {
+    await this.service.deletePost(dto);
   }
 
   @ApiOkResponse({

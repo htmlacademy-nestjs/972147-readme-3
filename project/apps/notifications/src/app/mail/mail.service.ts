@@ -7,7 +7,7 @@ import { MailSubjectsEnum } from "./mail.subjects.enum";
 export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  public async sendNotifyNewSubscriber(subscriber: Subscriber) {
+  public async sendNotifyOnSubscribe(subscriber: Subscriber) {
     await this.mailerService.sendMail({
       to: subscriber.email,
       subject: MailSubjectsEnum.EMAIL_ADD_SUBSCRIBER,

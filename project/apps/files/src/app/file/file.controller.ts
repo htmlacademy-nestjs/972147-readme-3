@@ -1,16 +1,14 @@
-import { Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, HttpCode, Get, HttpException, HttpStatus, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express, Response } from 'express';
 import 'multer';
 import { FileService } from './file.service';
 import { fillObject } from '@project/util/util-core';
 import { FileInfoRdo } from '../rdo/file-info.rdo';
-import { ApiBody, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { FileUploadDto } from '../dto/file-upload.dto';
-import { MongoidValidationPipe } from "@project/shared/shared-pipes";
-import { AuthAccessGuard } from "../auth/guards/auth-access.guard";
-import { ExtractUser } from "@project/shared/shared-decorators";
-import { User } from "@project/shared/app-types";
+import { ApiBadRequestResponse, ApiBody, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { UploadFileDto } from '../dto/upload-file.dto';
+import { MongoidValidationPipe } from '@project/shared/shared-pipes';
+import { DeleteFileDto } from '../dto/delete-file.dto';
 
 @ApiTags('Files')
 @Controller('files')
@@ -19,7 +17,7 @@ export class FileController {
 
   @Post('')
   @ApiBody({
-    type: FileUploadDto,
+    type: UploadFileDto,
     description: 'File to upload',
   })
   @ApiConsumes('multipart/form-data')
@@ -27,10 +25,9 @@ export class FileController {
     type: FileInfoRdo,
     description: 'Info about uploaded file',
   })
-  @UseGuards(AuthAccessGuard)
   @UseInterceptors(FileInterceptor('file'))
-  public async uploadFile(@UploadedFile() file: Express.Multer.File, @ExtractUser() user: User) {
-    const fileInfo = await this.fileService.writeFile(user.id, file);
+  public async uploadFile(@UploadedFile() file: Express.Multer.File, @Body() dto: UploadFileDto) {
+    const fileInfo = await this.fileService.writeFile(dto.ownerId, file);
     return fillObject(FileInfoRdo, fileInfo);
   }
 
@@ -66,15 +63,22 @@ export class FileController {
     return filestream.pipe(res);
   }
 
+  @ApiBody({
+    type: UploadFileDto,
+    description: 'File to upload',
+  })
   @ApiNotFoundResponse({
     description: 'File not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Owner id is not valid',
   })
   @ApiOkResponse({
     description: 'File has been successfully deleted.',
   })
-  @UseGuards(AuthAccessGuard)
-  @Delete(':id')
-  public async deleteFile(@Param('id', MongoidValidationPipe) fileId: string, @ExtractUser() user: User) {
-    await this.fileService.deleteFile(user.id, fileId);
+  @HttpCode(HttpStatus.OK)
+  @Post('delete')
+  public async deleteFile(dto: DeleteFileDto) {
+    await this.fileService.deleteFile(dto.ownerId, dto.fileId);
   }
 }

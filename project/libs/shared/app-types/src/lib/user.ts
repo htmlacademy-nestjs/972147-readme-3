@@ -6,6 +6,4 @@ export abstract class User {
   public email!: string;
   public avatarFileId?: string;
   public registeredAt!: Date;
-  public postsCount!: number;
-  public subscribersCount!: number;
 }

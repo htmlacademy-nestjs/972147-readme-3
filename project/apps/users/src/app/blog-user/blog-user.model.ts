@@ -26,13 +26,6 @@ export class BlogUserModel extends Document implements User {
 
   @Prop({ required: true })
   public registeredAt!: Date;
-
-  @Prop({ required: true })
-  public postsCount!: number;
-
-  @Prop({ required: true })
-  public subscribersCount!: number;
-
 }
 
 export const BlogUserSchema = SchemaFactory.createForClass(BlogUserModel);

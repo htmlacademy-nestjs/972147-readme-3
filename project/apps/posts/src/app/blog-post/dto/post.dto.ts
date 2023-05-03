@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { ArrayMaxSize, IsDate, IsOptional, IsString, Length, Matches, NotContains } from 'class-validator';
+import { ArrayMaxSize, IsDate, IsNotEmpty, IsOptional, IsString, Length, Matches, NotContains } from "class-validator";
 
 export class PostDto {
   @ApiProperty({
@@ -27,4 +27,14 @@ export class PostDto {
   })
   @IsOptional()
   public tags?: string[];
+
+
+  @ApiProperty({
+    description: 'Unique identifier of the author',
+    example: '644e7abb052df2e90a53b3c2',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @Expose()
+  public authorId!: string;
 }

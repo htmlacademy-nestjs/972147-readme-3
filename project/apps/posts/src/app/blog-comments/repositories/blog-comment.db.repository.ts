@@ -1,4 +1,4 @@
-import { BlogCommentRepositoryInterface, WithAuthorId } from './blog-comment.repository.interface';
+import { BlogCommentRepositoryInterface } from './blog-comment.repository.interface';
 import { Injectable } from '@nestjs/common';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { Comment } from '@project/shared/app-types';
@@ -32,7 +32,7 @@ export class BlogCommentDbRepository implements BlogCommentRepositoryInterface {
     return this.mapDbCommentToComment(dbComment);
   }
 
-  public async create(dto: WithAuthorId<CreateCommentDto>): Promise<Comment> {
+  public async create(dto: CreateCommentDto): Promise<Comment> {
     const dbComment = await this.prisma.comment.create({
       data: {
         text: dto.text,

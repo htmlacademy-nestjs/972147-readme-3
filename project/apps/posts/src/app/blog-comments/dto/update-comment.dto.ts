@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, MaxLength, MinLength } from "class-validator";
+import { IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 
 export class UpdateCommentDto {
   @ApiProperty({
@@ -10,4 +10,12 @@ export class UpdateCommentDto {
   @MinLength(10)
   @MaxLength(300)
   public text!: string;
+
+  @ApiProperty({
+    description: 'Unique identifier author post',
+    example: '644e7abb052df2e90a53b3c2',
+  })
+  @IsString()
+  @IsNotEmpty()
+  public authorId!: string;
 }

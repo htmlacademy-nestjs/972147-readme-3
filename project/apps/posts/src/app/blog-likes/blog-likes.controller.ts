@@ -1,9 +1,7 @@
-import { Controller, Delete, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
 import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { BlogLikesService } from './blog-likes.service';
-import { AuthAccessGuard } from '../blog-auth/guards/auth-access.guard';
-import { ExtractUser } from '@project/shared/shared-decorators';
-import { User } from '@project/shared/app-types';
+import { LikeDto } from "./dto/like.dto";
 
 @ApiTags('Likes')
 @Controller('likes')
@@ -19,10 +17,9 @@ export class BlogLikesController {
   @ApiOkResponse({
     description: 'Post has been successfully liked.',
   })
-  @UseGuards(AuthAccessGuard)
-  @Post('post/:postId/like')
-  public async likePost(@Param('postId', ParseUUIDPipe) postId: string, @ExtractUser() user: User) {
-    await this.service.likePost(user.id, postId);
+  @Post('like')
+  public async likePost(@Body() dto: LikeDto) {
+    await this.service.likePost(dto);
   }
 
   @ApiNotFoundResponse({
@@ -31,9 +28,9 @@ export class BlogLikesController {
   @ApiOkResponse({
     description: 'Post has been successfully unliked.',
   })
-  @UseGuards(AuthAccessGuard)
-  @Delete('post/:postId/unlike')
-  public async unlikePost(@Param('postId', ParseUUIDPipe) postId: string, @ExtractUser() user: User) {
-    await this.service.unlikePost(user.id, postId);
+  @HttpCode(HttpStatus.OK)
+  @Post('unlike')
+  public async unlikePost(@Body() dto: LikeDto) {
+    await this.service.unlikePost(dto);
   }
 }

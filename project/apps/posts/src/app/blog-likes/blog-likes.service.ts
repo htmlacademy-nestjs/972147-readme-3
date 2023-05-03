@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { BlogLikesDbRepository } from "./repositories/blog-likes.db.repository";
+import { BlogLikesDbRepository } from './repositories/blog-likes.db.repository';
+import { LikeDto } from './dto/like.dto';
 
 @Injectable()
 export class BlogLikesService {
   constructor(private readonly repository: BlogLikesDbRepository) {}
 
-  public async likePost(authorId: string, postId: string) {
-    await this.repository.create({ authorId, postId });
+  public async likePost(dto: LikeDto) {
+    await this.repository.create(dto);
   }
 
-  public async unlikePost(authorId: string, postId: string) {
-    await this.repository.delete({ authorId, postId });
+  public async unlikePost(dto: LikeDto) {
+    await this.repository.delete(dto);
   }
 }

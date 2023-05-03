@@ -35,4 +35,8 @@ export class BlogPostQuery {
   @IsOptional()
   @IsIn(['asc', 'desc'])
   public sortDirection: 'asc' | 'desc' = DEFAULT_POST_SORT_DIRECTION;
+
+  @IsOptional()
+  @IsString()
+  public search?: string;
 }

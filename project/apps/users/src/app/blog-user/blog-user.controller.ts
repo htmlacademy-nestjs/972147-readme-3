@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards, Delete } from '@nestjs/common';
 import { BlogUserService } from './blog-user.service';
 import { fillObject } from '@project/util/util-core';
 import { UserRdo } from './rdo/user.rdo';
@@ -60,8 +60,8 @@ export class BlogUserController {
   @HttpCode(HttpStatus.CREATED)
   public async create(@Body() dto: CreateUserDto): Promise<UserRdo> {
     const newUser = await this.blogUserService.registerUser(dto);
-    const { email, firstname, lastname } = newUser;
-    await this.notifyService.registerSubscriber({ email, firstname, lastname });
+    const { email, firstname, lastname, id } = newUser;
+    await this.notifyService.registerSubscriber({ email, firstname, lastname, userId: id, userSubscriptions: [] });
     return fillObject(UserRdo, newUser);
   }
 
@@ -88,7 +88,7 @@ export class BlogUserController {
   }
 
   @ApiOkResponse({
-    description: 'Email notifications has been successfully unsubscribed',
+    description: 'User has been successfully subscribed to updates from another user',
   })
   @ApiBadRequestResponse({
     description: 'User not provided or invalid data',
@@ -96,14 +96,31 @@ export class BlogUserController {
   @ApiNotFoundResponse({
     description: 'User not found',
   })
-  @Post('unsubscribe')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  public async unsubscribeEmailNotifications(@ExtractUser() token: TokenPayload | undefined): Promise<void> {
+  @Post('subscribe/:userId')
+  public async subscribeToUserUpdates(@Param('userId', MongoidValidationPipe) userId: string, @ExtractUser() token: TokenPayload | undefined): Promise<void> {
     if (!token?.sub) {
       throw new BadRequestException('User not provided');
     }
-    const { email, firstname, lastname } = await this.blogUserService.getUser(token.sub);
-    await this.notifyService.unregisterSubscriber({ email, firstname, lastname });
+    const { id } = await this.blogUserService.getUser(token.sub);
+    await this.notifyService.subscribeToUser({ fromUserId: id, toUserId: userId });
+  }
+
+  @ApiOkResponse({
+    description: 'User has been successfully subscribed to updates from another user',
+  })
+  @ApiBadRequestResponse({
+    description: 'User not provided or invalid data',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
+  @Delete('unsubscribe/:userId')
+  public async unsubscribeFromUser(@Param('userId', MongoidValidationPipe) userId: string, @ExtractUser() token: TokenPayload | undefined): Promise<void> {
+    if (!token?.sub) {
+      throw new BadRequestException('User not provided');
+    }
+    const { id } = await this.blogUserService.getUser(token.sub);
+    await this.notifyService.unsubscribeFromUser({ fromUserId: id, toUserId: userId });
   }
 }

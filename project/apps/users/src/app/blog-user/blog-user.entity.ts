@@ -12,8 +12,6 @@ export class BlogUserEntity extends User {
     this.email = user.email;
     this.avatarFileId = user.avatarFileId;
     this.registeredAt = user.registeredAt;
-    this.postsCount = user.postsCount;
-    this.subscribersCount = user.subscribersCount;
   }
 
   public async setPassword(password: string): Promise<BlogUserEntity> {

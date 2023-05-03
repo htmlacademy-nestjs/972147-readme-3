@@ -1,16 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, IsUUID, MaxLength, MinLength } from "class-validator";
+import { IsNotEmpty, IsString, IsUUID } from "class-validator";
 
-export class CreateCommentDto {
-  @ApiProperty({
-    description: 'Text of the comment',
-    example: 'This is a comment'
-  })
-  @IsString()
-  @MinLength(10)
-  @MaxLength(300)
-  public text!: string;
-
+export class LikeDto {
   @ApiProperty({
     description: 'Unique identifier of the post',
     example: '5f9b9c0c-9b5c-4b9c-9c0c-9b5c4b9c0c5f'
@@ -20,7 +11,7 @@ export class CreateCommentDto {
   public postId!: string;
 
   @ApiProperty({
-    description: 'Unique identifier author post',
+    description: 'Unique identifier author comment',
     example: '644e7abb052df2e90a53b3c2',
   })
   @IsString()

@@ -4,3 +4,4 @@ export * from './quote-post.dto';
 export * from './link-post.dto';
 export * from './text-post.dto';
 export * from './dto.map';
+export * from './delete-post.dto';

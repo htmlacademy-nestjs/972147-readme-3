@@ -45,8 +45,6 @@ export class BlogUserService {
     const userEntity = new BlogUserEntity({
       id: '',
       registeredAt: new Date(),
-      postsCount: 0,
-      subscribersCount: 0,
       passwordHash: '',
       email: dto.email,
       firstname: dto.firstname,
