@@ -1,12 +1,14 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards, Get } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { fillObject } from '@project/util/util-core';
 import { LoginUserRdo } from './rdo/login-user.rdo';
 import { ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { Request } from 'express';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ExtractUser } from '@project/shared/shared-decorators';
+import { TokenPayload } from "@project/shared/app-types";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { CheckUserRdo } from "./rdo/check-user.rdo";
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -34,13 +36,26 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: 'Refresh token is incorrect',
   })
-  @Get('refresh-token')
+  @Get('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
-  public async refreshToken(@Req() req: Request) {
-    const user = req.user as { refreshToken: string };
-    const tokens = await this.authService.loginByRefreshToken(user.refreshToken);
+  public async refreshToken(@ExtractUser() payload: TokenPayload): Promise<LoginUserRdo> {
+    const tokens = await this.authService.loginByRefreshToken(payload);
     return fillObject(LoginUserRdo, tokens);
+  }
+
+  @ApiOkResponse({
+    type: CheckUserRdo,
+    description: 'User token has been successfully checked.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Token is incorrect',
+  })
+  @Post('check')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  public async check(@ExtractUser() payload: TokenPayload): Promise<CheckUserRdo> {
+    return fillObject(CheckUserRdo, { userId: payload.sub});
   }
 
   @ApiUnauthorizedResponse({
@@ -51,10 +66,9 @@ export class AuthController {
   })
   @Get('logout')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtRefreshGuard)
-  public async logout(@Req() req: Request) {
-    const user = req.user as { refreshToken: string };
-    await this.authService.logout(user.refreshToken);
+  @UseGuards(JwtAuthGuard)
+  public async logout(@ExtractUser() payload: TokenPayload) {
+    await this.authService.logout(payload);
   }
 
   @ApiUnauthorizedResponse({
@@ -65,9 +79,8 @@ export class AuthController {
   })
   @Get('logout-all')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtRefreshGuard)
-  public async logoutAll(@Req() req: Request) {
-    const user = req.user as { refreshToken: string };
-    await this.authService.logoutAll(user.refreshToken);
+  @UseGuards(JwtAuthGuard)
+  public async logoutAll(@ExtractUser() payload: TokenPayload) {
+    await this.authService.logoutAll(payload);
   }
 }

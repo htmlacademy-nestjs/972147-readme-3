@@ -1,7 +1,7 @@
 import { Post, PostGeneric, PostImage, PostLink, PostQuote, PostStatusEnum, PostText, PostTypeEnum, PostUnion, PostVideo } from '@project/shared/app-types';
-import { BlogPostRepository, PostAuthor } from './blog-post.repository.interface';
+import { BlogPostRepository } from './blog-post.repository.interface';
 import { BlogPostDtoGeneric } from '../dto';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   Post as DBPost,
@@ -14,7 +14,8 @@ import {
   PostVideo as DBPostVideo,
   Tag as DBTag,
 } from '@prisma/client';
-import { BlogPostQuery } from "../query/blog-post.query";
+import { BlogPostQuery } from '../query/blog-post.query';
+import { CreateRepostDto } from "../dto/create-repost.dto";
 
 type Nullable<T> = T | null;
 
@@ -87,7 +88,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
     }
   }
 
-  private mapPostTypeToDBPostType (type: PostTypeEnum): DBPostType {
+  private mapPostTypeToDBPostType(type: PostTypeEnum): DBPostType {
     switch (type) {
       case PostTypeEnum.IMAGE:
         return DBPostType.IMAGE;
@@ -216,14 +217,24 @@ export class BlogPostDbRepository implements BlogPostRepository {
   }
 
   public async list(query: BlogPostQuery): Promise<PostUnion[]> {
-    const {sortBy, sortDirection, page, type, limit, authorId} = query;
+    const { sortBy, sortDirection, page, type, limit, authorIds, search } = query;
     const dbPosts = await this.prisma.post.findMany({
       where: {
         type: {
           equals: type ? this.mapPostTypeToDBPostType(type) : undefined,
         },
+        postVideo: search
+          ? {
+              name: { contains: search },
+            }
+          : undefined,
+        postText: search
+          ? {
+              name: { contains: search },
+            }
+          : undefined,
         status: DBPostStatus.PUBLISHED,
-        authorId: authorId,
+        authorId: authorIds ? { in: authorIds } : undefined,
       },
       orderBy: {
         publishedAt: sortBy === 'published' ? sortDirection : undefined,
@@ -246,7 +257,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
     return dbPosts.map((dbPost) => this.mapDBPostWithPostToPostUnion(dbPost));
   }
 
-  public async create<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T, PostAuthor>): Promise<PostGeneric<T>> {
+  public async create<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>): Promise<PostGeneric<T>> {
     const dbPost = await this.prisma.post.create({
       data: {
         authorId: dto.authorId,
@@ -301,5 +312,54 @@ export class BlogPostDbRepository implements BlogPostRepository {
     });
 
     return this.mapDBPostWithPostToPostUnion(dbPost) as unknown as Promise<PostGeneric<T>>;
+  }
+
+  public async createRepost(dto: CreateRepostDto): Promise<PostUnion> {
+    const {postId, authorId} = dto;
+    const dbPost = await this.prisma.post.findFirst({
+      where: { id: postId },
+      include: {
+        tags: true,
+        ...this.getIncludedPosts(),
+        ...this.getIncludedCount(),
+      },
+    });
+
+    if (!dbPost) {
+      throw new NotFoundException();
+    }
+
+    if (dbPost.isRepost) {
+      throw new BadRequestException('Repost can not be reposted');
+    }
+
+    const repost = await this.prisma.post.create({
+      data: {
+        authorId,
+        originalAuthorId: dbPost.authorId,
+        isRepost: true,
+        publishedAt: new Date(),
+        type: dbPost.type,
+        tags: {
+          create: dbPost.tags.map((tag) => ({ name: tag.name })),
+        },
+        status: DBPostStatus.PUBLISHED,
+        postQuote: dbPost.postQuote ? { create: { ...dbPost.postQuote } } : undefined,
+        postImage: dbPost.postImage ? { create: { ...dbPost.postImage } } : undefined,
+        postText: dbPost.postText ? { create: { ...dbPost.postText } } : undefined,
+        postVideo: dbPost.postVideo ? { create: { ...dbPost.postVideo } } : undefined,
+      },
+      include: {
+        tags: true,
+        ...this.getIncludedPosts(),
+        ...this.getIncludedCount(),
+      },
+    });
+
+    return this.mapDBPostWithPostToPostUnion(repost);
+  }
+
+  public async getCountByAuthorId(authorId: string): Promise<number> {
+    return this.prisma.post.count({ where: { authorId, status: DBPostStatus.PUBLISHED } });
   }
 }

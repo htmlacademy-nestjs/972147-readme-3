@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
-import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from "@nestjs/common";
+import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 import { BlogCommentsService } from './blog-comments.service';
 import { fillObject } from '@project/util/util-core';
 import { CommentRdo } from './rdo/comment.rdo';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { BlogCommentQuery } from './query/blog-comment.query';
+import { DeleteCommentDto } from "./dto/delete-comment.dto";
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -29,12 +30,16 @@ export class BlogCommentController {
     type: CommentRdo,
     description: 'Comment has been successfully created.',
   })
-  @Post('create')
+  @Post('')
   public async createComment(@Body() dto: CreateCommentDto) {
     const comment = await this.service.createComment(dto);
     return fillObject(CommentRdo, comment);
   }
 
+  @ApiBody({
+    type: UpdateCommentDto,
+    description: 'Comment data',
+  })
   @ApiOkResponse({
     type: CommentRdo,
     description: 'Comment has been successfully updated.',
@@ -45,15 +50,23 @@ export class BlogCommentController {
     return fillObject(CommentRdo, comment);
   }
 
+  @ApiBody({
+    type: DeleteCommentDto,
+    description: 'Delete comment data',
+  })
+  @ApiBadRequestResponse({
+    description: 'Author id and comment id are not match'
+  })
   @ApiNotFoundResponse({
     description: 'Comment not found',
   })
   @ApiOkResponse({
     description: 'Comment has been successfully deleted.',
   })
-  @Delete(':id')
-  public async deleteComment(@Param('id', ParseUUIDPipe) id: string) {
-    await this.service.deleteComment(id);
+  @HttpCode(HttpStatus.OK)
+  @Post('delete')
+  public async deleteComment(@Body() dto: DeleteCommentDto) {
+    await this.service.deleteComment(dto);
   }
 
   @ApiOkResponse({

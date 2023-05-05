@@ -1,0 +1,7 @@
+<h2>Привет, {{user}}</h2>
+<p>Новые посты в блоге:</p>
+<ul>
+{{#each posts}}
+  <li><a href="{{link}}">{{title}}</a></li>
+{{/each}}
+</ul>

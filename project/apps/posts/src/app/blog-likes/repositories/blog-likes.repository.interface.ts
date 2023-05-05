@@ -1,10 +1,7 @@
-export interface LikeParams {
-  authorId: string;
-  postId: string;
-}
+import { LikeDto } from "../dto/like.dto";
 
 export interface BlogLikesRepositoryInterface {
-  create(params: LikeParams): Promise<void>;
+  create(params: LikeDto): Promise<void>;
 
-  delete(params: LikeParams): Promise<void>;
+  delete(params: LikeDto): Promise<void>;
 }

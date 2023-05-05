@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  notifications.fakesmtp:
+    image:  gessnerfl/fake-smtp-server:2.0.0
+    container_name: notifications.fakesmtp
+    hostname: fakesmtp
+    restart: always
+    ports:
+      - "8025:8025"
+      - "1083:8080"
+    networks:
+      - notifications.network
+
+  notifications.rabbitmq:
+    image: rabbitmq:3.11-management
+    container_name: notifications.rabbitmq
+    ports:
+      - "1088:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: test
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - notifications.network
+
+  notifications.mongo:
+    image: mongo
+    restart: always
+    container_name: notifications.mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 12345678
+      MONGO_INITDB_DATABASE: notifications
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo.notifications:/data/db
+
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/notifications --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+    networks:
+      - notifications.network
+
+  notifications.mongo.ui:
+    image: mongo-express
+    restart: always
+    container_name: notifications.mongo.ui
+    ports:
+      - "8085:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://admin:12345678@notifications.mongo:27017/
+    depends_on:
+      - notifications.mongo
+    networks:
+      - notifications.network
+
+networks:
+  notifications.network:
+    driver: bridge
+
+volumes:
+  mongo.notifications:

@@ -1,11 +1,13 @@
-import { Controller, Delete, Get, Param, ParseUUIDPipe, Post } from "@nestjs/common";
-import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
-import { BlogLikesService } from "./blog-likes.service";
+import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { BlogLikesService } from './blog-likes.service';
+import { LikeDto } from "./dto/like.dto";
 
 @ApiTags('Likes')
 @Controller('likes')
 export class BlogLikesController {
   constructor(private readonly service: BlogLikesService) {}
+
   @ApiNotFoundResponse({
     description: 'Post not found',
   })
@@ -15,9 +17,9 @@ export class BlogLikesController {
   @ApiOkResponse({
     description: 'Post has been successfully liked.',
   })
-  @Post('post/:postId/like')
-  public async likePost(@Param('postId', ParseUUIDPipe) postId: string) {
-    await this.service.likePost(postId);
+  @Post('like')
+  public async likePost(@Body() dto: LikeDto) {
+    await this.service.likePost(dto);
   }
 
   @ApiNotFoundResponse({
@@ -26,8 +28,9 @@ export class BlogLikesController {
   @ApiOkResponse({
     description: 'Post has been successfully unliked.',
   })
-  @Delete('post/:postId/unlike')
-  public async unlikePost(@Param('postId', ParseUUIDPipe) postId: string) {
-    await this.service.unlikePost(postId);
+  @HttpCode(HttpStatus.OK)
+  @Post('unlike')
+  public async unlikePost(@Body() dto: LikeDto) {
+    await this.service.unlikePost(dto);
   }
 }

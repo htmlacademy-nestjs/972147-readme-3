@@ -23,8 +23,8 @@ export class BlogPostQuery {
   public type?: PostTypeEnum;
 
   @IsOptional()
-  @IsString()
-  public authorId?: string;
+  @IsString({each: true})
+  public authorIds?: string[];
 
   @Transform(({ value }) => value || DEFAULT_POST_SORT_BY)
   @IsOptional()
@@ -35,4 +35,8 @@ export class BlogPostQuery {
   @IsOptional()
   @IsIn(['asc', 'desc'])
   public sortDirection: 'asc' | 'desc' = DEFAULT_POST_SORT_DIRECTION;
+
+  @IsOptional()
+  @IsString()
+  public search?: string;
 }

@@ -10,10 +10,10 @@ export class BlogUserModel extends Document implements User {
   public id!: string;
 
   @Prop({ required: true })
-  public firstName!: string;
+  public firstname!: string;
 
   @Prop({ required: true })
-  public lastName!: string;
+  public lastname!: string;
 
   @Prop({ required: true })
   public passwordHash!: string;
@@ -26,13 +26,6 @@ export class BlogUserModel extends Document implements User {
 
   @Prop({ required: true })
   public registeredAt!: Date;
-
-  @Prop({ required: true })
-  public postsCount!: number;
-
-  @Prop({ required: true })
-  public subscribersCount!: number;
-
 }
 
 export const BlogUserSchema = SchemaFactory.createForClass(BlogUserModel);

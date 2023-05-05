@@ -1,13 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException, Inject } from "@nestjs/common";
+import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { LoginUserDto } from './dto/login-user.dto';
 import { BlogUserEntity } from '../blog-user/blog-user.entity';
 import { BlogUserDbRepository } from '../blog-user/repository/blog-user.db-repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayload, User } from '@project/shared/app-types';
-import { createHash } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { MAX_LOGINED_DEVICES_PER_USER } from './auth.config';
 import { TokenRepository } from './token.repository';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthService {
@@ -15,11 +17,9 @@ export class AuthService {
     private readonly blogUserRepository: BlogUserDbRepository,
     private readonly tokenRepository: TokenRepository,
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService
-  ) {}
-
-  private async hash(token: string) {
-    return createHash('sha256').update(token).digest('hex');
+    private readonly jwtService: JwtService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ) {
   }
 
   private async validateUser(dto: LoginUserDto) {
@@ -36,8 +36,10 @@ export class AuthService {
     return blogUserEntity.toObject();
   }
 
-  private async createUserTokens({ id, email, firstName, lastName }: User) {
-    const payload: TokenPayload = { sub: id, email, firstName, lastName };
+  private async createUserTokens({ id }: User) {
+    const accessTokenId = randomUUID();
+    const refreshTokenId = randomUUID();
+    const payload: TokenPayload = { sub: id, accessTokenId, refreshTokenId };
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('jwt.accessTokenSecret'),
       expiresIn: this.configService.get<string>('jwt.accessTokenExpiresIn'),
@@ -54,30 +56,24 @@ export class AuthService {
     };
   }
 
-  public async updateTokenHash(oldToken: string, newToken: string) {
-    const oldTokenHash = await this.hash(oldToken);
-    const newTokenHash = await this.hash(newToken);
-    return this.tokenRepository.updateHash(oldTokenHash, newTokenHash);
+  private async updateRefreshToken(oldTokenId: string, newRefreshToken: string) {
+    await this.tokenRepository.deleteOneByRefreshTokenId(oldTokenId);
+    await this.saveRefreshToken(newRefreshToken);
   }
 
-  public async getRefreshTokenPayload(refreshToken: string): Promise<TokenPayload & { iat: number; exp: number }> {
-    const decoded = this.jwtService.decode(refreshToken);
+  private getTokenPayload(token: string): Required<TokenPayload> {
+    const decoded = this.jwtService.decode(token);
     if (!decoded) {
       throw new UnauthorizedException();
     }
-    return decoded as TokenPayload & { iat: number; exp: number };
+    return decoded as Required<TokenPayload>;
   }
 
-  public async validateRefreshToken(refreshToken: string) {
-    const tokenHash = await this.hash(refreshToken);
-    const token = await this.tokenRepository.findByHash(tokenHash);
+  public async validateRefreshToken(refreshTokenId: string) {
+    const token = await this.tokenRepository.findByRefreshTokenId(refreshTokenId);
     if (!token) {
       throw new UnauthorizedException();
     }
-    await this.jwtService.verifyAsync(refreshToken, {
-      secret: this.configService.get<string>('jwt.refreshTokenSecret'),
-      algorithms: ['HS256'],
-    });
   }
 
   private async revokeUnnecessaryRefreshTokens(userId: string) {
@@ -88,14 +84,29 @@ export class AuthService {
   }
 
   private async saveRefreshToken(refreshToken: string) {
-    const tokenHash = await this.hash(refreshToken);
-    const tokenPayload = await this.getRefreshTokenPayload(refreshToken);
+    const payload = this.getTokenPayload(refreshToken);
     await this.tokenRepository.create({
-      refreshTokenHash: tokenHash,
-      userId: tokenPayload.sub,
-      expiresAt: new Date(tokenPayload.exp * 1000),
-      issuedAt: new Date(tokenPayload.iat * 1000),
+      refreshTokenId: payload.refreshTokenId,
+      userId: payload.sub,
+      expiresAt: new Date(payload.exp * 1000),
+      issuedAt: new Date(payload.iat * 1000),
     });
+  }
+
+  private async saveAccessToken(token: string) {
+    const payload = this.getTokenPayload(token);
+    await this.cacheManager.set(payload.accessTokenId, payload.sub, (payload.exp - payload.iat) * 1000);
+  }
+
+  public async validateAccessToken(accessTokenId: string) {
+    const cachedToken = await this.cacheManager.get(accessTokenId);
+    if (!cachedToken) {
+      throw new UnauthorizedException();
+    }
+  }
+
+  public async deleteAccessToken(accessTokenId: string) {
+    await this.cacheManager.del(accessTokenId);
   }
 
   public async login(dto: LoginUserDto) {
@@ -103,28 +114,29 @@ export class AuthService {
     await this.revokeUnnecessaryRefreshTokens(user.id);
     const tokens = await this.createUserTokens(user);
     await this.saveRefreshToken(tokens.refreshToken);
+    await this.saveAccessToken(tokens.accessToken);
     return tokens;
   }
 
-  public async loginByRefreshToken(refreshToken: string) {
-    await this.validateRefreshToken(refreshToken);
-    const tokenPayload = await this.getRefreshTokenPayload(refreshToken);
-    const user = await this.blogUserRepository.get(tokenPayload.sub);
+  public async loginByRefreshToken(payload: TokenPayload) {
+    const user = await this.blogUserRepository.get(payload.sub);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
     const tokens = await this.createUserTokens(user);
-    await this.updateTokenHash(refreshToken, tokens.refreshToken);
+    await this.deleteAccessToken(payload.accessTokenId);
+    await this.updateRefreshToken(payload.refreshTokenId, tokens.refreshToken);
+    await this.saveAccessToken(tokens.accessToken);
     return tokens;
   }
 
-  public async logoutAll(refreshToken: string) {
-    const tokenPayload = await this.getRefreshTokenPayload(refreshToken);
-    await this.tokenRepository.deleteAllByUserId(tokenPayload.sub);
+  public async logoutAll(payload: TokenPayload) {
+    await this.deleteAccessToken(payload.accessTokenId);
+    await this.tokenRepository.deleteAllByUserId(payload.sub);
   }
 
-  public async logout(refreshToken: string) {
-    const tokenHash = await this.hash(refreshToken);
-    await this.tokenRepository.deleteOne(tokenHash);
+  public async logout(payload: TokenPayload) {
+    await this.deleteAccessToken(payload.accessTokenId);
+    await this.tokenRepository.deleteOneByRefreshTokenId(payload.refreshTokenId);
   }
 }

@@ -4,7 +4,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class UserRdo {
   @ApiProperty({
     description: 'User unique ID',
-    example: '5ebc9b18-6564-4dec-b559-10402a71ab36'
+    example: '5f9c1b9b9c9d1b1b8c8c8c8c'
   })
   @Expose()
   public id!: string;
@@ -14,14 +14,14 @@ export class UserRdo {
     example: 'Ivan'
   })
   @Expose()
-  public firstName!: string;
+  public firstname!: string;
 
   @ApiProperty({
     description: 'User lastname',
     example: 'Ivanov'
   })
   @Expose()
-  public lastName!: string;
+  public lastname!: string;
 
   @ApiProperty({
     description: 'User email',
@@ -43,18 +43,4 @@ export class UserRdo {
   })
   @Expose()
   public registeredAt!: Date;
-
-  @ApiProperty({
-    description: 'User posts count',
-    example: '12'
-  })
-  @Expose()
-  public postsCount!: number;
-
-  @ApiProperty({
-    description: 'User subscribers count',
-    example: '10'
-  })
-  @Expose()
-  public subscribersCount!: number;
 }
