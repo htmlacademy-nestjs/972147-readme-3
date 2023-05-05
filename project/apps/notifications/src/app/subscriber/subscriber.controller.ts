@@ -101,8 +101,8 @@ export class SubscriberController {
     routingKey: RabbitmqRoutingEnum.DeleteNewPost,
     exchange: 'notifications',
   })
-  public async deleteNewPost(post: NewPost) {
-    await this.subscriberService.deleteNewPost(post);
+  public async deleteNewPost(postId: string) {
+    await this.subscriberService.deleteNewPost(postId);
   }
 
   @RabbitSubscribe({

@@ -116,8 +116,8 @@ export class SubscriberService {
     return this.newPostsRepository.deleteManyNewPosts(newPostIds);
   }
 
-  public async deleteNewPost(newPost: NewPost) {
-    return this.newPostsRepository.deleteNewPostsByPostId(newPost.postId);
+  public async deleteNewPost(postId: string) {
+    return this.newPostsRepository.deleteNewPostsByPostId(postId);
   }
 
   public async deleteNewPostsBySubscriber(subscriber: Subscriber): Promise<void> {

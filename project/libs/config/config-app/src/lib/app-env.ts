@@ -1,4 +1,4 @@
-import { IsIn, IsNumber, Max, Min } from 'class-validator';
+import { IsIn, IsNotEmpty, IsNumber, IsString, Max, Min } from "class-validator";
 import { ApplicationConfig } from "./app.config";
 
 const MIN_PORT = 0;
@@ -14,6 +14,10 @@ export class AppEnv implements ApplicationConfig {
     message: EnvValidationMessage.AppEnvironmentRequired
   })
   public environment!: 'development' | 'production' | 'stage';
+
+  @IsString()
+  @IsNotEmpty()
+  public host!: string;
 
   @IsNumber({}, {
     message: EnvValidationMessage.AppPortRequired

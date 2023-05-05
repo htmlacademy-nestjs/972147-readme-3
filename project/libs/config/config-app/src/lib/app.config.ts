@@ -4,12 +4,14 @@ import { validateSync } from 'class-validator';
 import { AppEnv } from './app-env';
 
 export interface ApplicationConfig {
+  host: string;
   environment: 'development' | 'production' | 'stage';
   port: number;
 }
 
 export default registerAs('application', (): ApplicationConfig => {
   const config: ApplicationConfig = {
+    host: process.env.HOST || 'localhost',
     environment: process.env.NODE_ENV as ApplicationConfig['environment'],
     port: parseInt(process.env.PORT || '', 10),
   };
