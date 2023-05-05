@@ -1,11 +1,15 @@
 import { SubscriberDto } from './dto/subscriber.dto';
 import { SubscriberRepository } from './subscriber.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Subscriber, UserSubscription } from '@project/shared/app-types';
+import { NewPost, Subscriber, UserSubscription } from "@project/shared/app-types";
+import { NewPostsRepository } from "./new-posts.repository";
 
 @Injectable()
 export class SubscriberService {
-  constructor(private readonly subscriberRepository: SubscriberRepository) {}
+  constructor(
+    private readonly subscriberRepository: SubscriberRepository,
+    private readonly newPostsRepository: NewPostsRepository
+  ) {}
 
   public async getUserSubscriptions(userId: string): Promise<string[]> {
     const subscriber = await this.subscriberRepository.findByUserId(userId);
@@ -97,5 +101,26 @@ export class SubscriberService {
       ...subscriber,
       userSubscriptions: subscriber.userSubscriptions.filter((id) => id !== subscription.toUserId),
     });
+  }
+
+  public async getNewPosts(subscriber: Subscriber) {
+    return this.newPostsRepository.getNewPosts(subscriber);
+  }
+
+  public async addNewPost(newPost: NewPost) {
+    const subscribers = await this.subscriberRepository.findSubscribersByUserId(newPost.authorId);
+    return this.newPostsRepository.createNewPosts(newPost, subscribers);
+  }
+
+  public async deleteManyNewPosts(newPostIds: string[]) {
+    return this.newPostsRepository.deleteManyNewPosts(newPostIds);
+  }
+
+  public async deleteNewPost(newPost: NewPost) {
+    return this.newPostsRepository.deleteNewPostsByPostId(newPost.postId);
+  }
+
+  public async deleteNewPostsBySubscriber(subscriber: Subscriber): Promise<void> {
+    return this.newPostsRepository.deleteNewPostsBySubscriber(subscriber)
   }
 }

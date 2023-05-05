@@ -1,17 +1,14 @@
 import { SubscriberDto } from './dto/subscriber.dto';
 import { SubscriberService } from './subscriber.service';
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, NotFoundException } from '@nestjs/common';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { RabbitmqRoutingEnum, Subscriber, UserSubscription } from "@project/shared/app-types";
-import { MailService } from "../mail/mail.service";
-import { ApiNotFoundResponse, ApiOkResponse } from "@nestjs/swagger";
+import { NewPost, RabbitmqRoutingEnum, Subscriber, UserSubscription } from '@project/shared/app-types';
+import { MailService } from '../mail/mail.service';
+import { ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
 
-@Controller('subscriber')
+@Controller()
 export class SubscriberController {
-  constructor(
-    private readonly subscriberService: SubscriberService,
-    private readonly mailService: MailService,
-  ) {}
+  constructor(private readonly subscriberService: SubscriberService, private readonly mailService: MailService) {}
 
   @ApiOkResponse({
     type: String,
@@ -19,7 +16,7 @@ export class SubscriberController {
     description: 'Get subscriptions by user id',
   })
   @ApiNotFoundResponse({
-    description: 'User not found'
+    description: 'User not found',
   })
   @Get(':userId/subscriptions')
   public async getSubscriptions(userId: string) {
@@ -57,7 +54,7 @@ export class SubscriberController {
 
   @RabbitSubscribe({
     routingKey: RabbitmqRoutingEnum.UpdateSubscriber,
-    exchange: 'notifications'
+    exchange: 'notifications',
   })
   public async updateSubscriber(subscriber: SubscriberDto) {
     await this.subscriberService.updateSubscriber(subscriber);
@@ -65,7 +62,7 @@ export class SubscriberController {
 
   @RabbitSubscribe({
     routingKey: RabbitmqRoutingEnum.DeleteSubscriber,
-    exchange: 'notifications'
+    exchange: 'notifications',
   })
   public async deleteSubscriber(userId: string) {
     const subscriber = await this.subscriberService.getSubscriber(userId);
@@ -75,7 +72,7 @@ export class SubscriberController {
 
   @RabbitSubscribe({
     routingKey: RabbitmqRoutingEnum.AddSubscription,
-    exchange: 'notifications'
+    exchange: 'notifications',
   })
   public async addSubscription(subscription: UserSubscription) {
     await this.subscriberService.addSubscription(subscription);
@@ -83,9 +80,42 @@ export class SubscriberController {
 
   @RabbitSubscribe({
     routingKey: RabbitmqRoutingEnum.DeleteSubscription,
-    exchange: 'notifications'
+    exchange: 'notifications',
   })
   public async deleteSubscription(subscription: UserSubscription) {
     await this.subscriberService.deleteSubscription(subscription);
+    const subscriber = await this.subscriberService.getSubscriber(subscription.fromUserId);
+    const newPosts = await this.subscriberService.getNewPosts(subscriber);
+    await this.subscriberService.deleteManyNewPosts(newPosts.filter((post) => post.authorId === subscription.toUserId).map((p) => p.id));
+  }
+
+  @RabbitSubscribe({
+    routingKey: RabbitmqRoutingEnum.AddNewPost,
+    exchange: 'notifications',
+  })
+  public async addNewPost(post: NewPost) {
+    await this.subscriberService.addNewPost(post);
+  }
+
+  @RabbitSubscribe({
+    routingKey: RabbitmqRoutingEnum.DeleteNewPost,
+    exchange: 'notifications',
+  })
+  public async deleteNewPost(post: NewPost) {
+    await this.subscriberService.deleteNewPost(post);
+  }
+
+  @RabbitSubscribe({
+    routingKey: RabbitmqRoutingEnum.NotifyNewPosts,
+    exchange: 'notifications',
+  })
+  public async notifyNewPosts(subscriberId: string) {
+    const subscriber = await this.subscriberService.getSubscriber(subscriberId);
+    if (!subscriber) {
+      throw new NotFoundException('Subscriber not found');
+    }
+    const newPosts = await this.subscriberService.getNewPosts(subscriber);
+    await this.mailService.sendNotifyOnNewPosts(subscriber, newPosts);
+    await this.subscriberService.deleteNewPostsBySubscriber(subscriber);
   }
 }

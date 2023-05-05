@@ -5,4 +5,7 @@ export enum RabbitmqRoutingEnum {
   AddSubscription = 'notifications.addSubscription',
   UpdateSubscriptions = 'notifications.updateSubscription',
   DeleteSubscription = 'notifications.deleteSubscription',
+  AddNewPost = 'notifications.addNewPost',
+  DeleteNewPost = 'notifications.deleteNewPost',
+  NotifyNewPosts = 'notifications.notifyNewPosts',
 }

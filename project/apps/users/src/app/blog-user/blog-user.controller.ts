@@ -23,7 +23,7 @@ export class BlogUserController {
   @ApiBadRequestResponse({
     description: 'User not provided or invalid data',
   })
-  @Get('/profile')
+  @Get('profile')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   public async getLoggedUserProfile(@ExtractUser() user: TokenPayload | undefined): Promise<UserRdo> {

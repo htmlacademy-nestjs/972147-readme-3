@@ -217,7 +217,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
   }
 
   public async list(query: BlogPostQuery): Promise<PostUnion[]> {
-    const { sortBy, sortDirection, page, type, limit, authorId, search } = query;
+    const { sortBy, sortDirection, page, type, limit, authorIds, search } = query;
     const dbPosts = await this.prisma.post.findMany({
       where: {
         type: {
@@ -234,7 +234,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
             }
           : undefined,
         status: DBPostStatus.PUBLISHED,
-        authorId: authorId,
+        authorId: authorIds ? { in: authorIds } : undefined,
       },
       orderBy: {
         publishedAt: sortBy === 'published' ? sortDirection : undefined,

@@ -1,4 +1,5 @@
 export * from './lib/comment';
+export * from './lib/new-post';
 export * from './lib/post';
 export * from './lib/post-image';
 export * from './lib/post-link';
