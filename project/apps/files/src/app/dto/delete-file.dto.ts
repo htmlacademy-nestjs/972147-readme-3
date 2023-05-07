@@ -16,5 +16,5 @@ export class DeleteFileDto {
   })
   @IsString()
   @IsNotEmpty()
-  public ownerId!: string;
+  public ownerId?: string;
 }

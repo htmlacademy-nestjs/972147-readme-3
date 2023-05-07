@@ -5,6 +5,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SubscriberModel } from './subscriber.model';
 import { Model } from 'mongoose';
 import { SubscriberDto } from './dto/subscriber.dto';
+import { pipeGenerator } from "@nrwl/nest";
+import { log } from "handlebars";
 
 @Injectable()
 export class SubscriberRepository implements CrudRepository<string, SubscriberDto, SubscriberDto, Subscriber> {
@@ -12,7 +14,8 @@ export class SubscriberRepository implements CrudRepository<string, SubscriberDt
 
   public async create(item: SubscriberDto): Promise<Subscriber> {
     const newEmailSubscriber = new this.emailSubscriberModel(item);
-    return newEmailSubscriber.save();
+    await newEmailSubscriber.save();
+    return newEmailSubscriber.toObject();
   }
 
   public async delete(id: string): Promise<void> {
@@ -20,16 +23,20 @@ export class SubscriberRepository implements CrudRepository<string, SubscriberDt
   }
 
   public async get(id: string): Promise<Subscriber | null> {
-    return this.emailSubscriberModel.findOne({ _id: id }).exec();
+    const subscriber = await this.emailSubscriberModel.findOne({ _id: id }).exec();
+    if (!subscriber) {
+      return null;
+    }
+    return subscriber.toObject();
   }
 
   public async update(id: string, item: SubscriberDto): Promise<Subscriber> {
-    const subscriber = await this.emailSubscriberModel.findByIdAndUpdate({ userId: item.userId }, { ...item }, { new: true }).exec();
+    const subscriber = await this.emailSubscriberModel.findByIdAndUpdate({ id }, { ...item }, { new: true }).exec();
     if (!subscriber) {
       throw new Error('Not found');
     }
 
-    return subscriber;
+    return subscriber.toObject();
   }
 
   public async updateByUserId(item: SubscriberDto): Promise<Subscriber> {
@@ -38,14 +45,19 @@ export class SubscriberRepository implements CrudRepository<string, SubscriberDt
       throw new Error('Not found');
     }
 
-    return subscriber;
+    return subscriber.toObject();
   }
 
   public async findByUserId(userId: string): Promise<Subscriber | null> {
-    return this.emailSubscriberModel.findOne({ userId }).exec();
+    const subscriber = await this.emailSubscriberModel.findOne({ userId }).exec();
+    if (!subscriber) {
+      return null;
+    }
+    return subscriber.toObject();
   }
 
   public async findSubscribersByUserId(userId: string): Promise<Subscriber[]> {
-    return this.emailSubscriberModel.find({ userSubscriptions: { $in: [userId] } }).exec();
+    const subscribers = await this.emailSubscriberModel.find({ userSubscriptions: { $in: [userId] } }).exec();
+    return subscribers.map(subscriber => subscriber.toObject());
   }
 }

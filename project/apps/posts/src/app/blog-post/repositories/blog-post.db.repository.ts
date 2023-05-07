@@ -348,6 +348,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
         postImage: dbPost.postImage ? { create: { ...dbPost.postImage } } : undefined,
         postText: dbPost.postText ? { create: { ...dbPost.postText } } : undefined,
         postVideo: dbPost.postVideo ? { create: { ...dbPost.postVideo } } : undefined,
+        postLink: dbPost.postLink ? { create: { ...dbPost.postLink } } : undefined,
       },
       include: {
         tags: true,

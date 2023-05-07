@@ -27,7 +27,7 @@ export class FileController {
   })
   @UseInterceptors(FileInterceptor('file'))
   public async uploadFile(@UploadedFile() file: Express.Multer.File, @Body() dto: UploadFileDto) {
-    const fileInfo = await this.fileService.writeFile(dto.ownerId, file);
+    const fileInfo = await this.fileService.writeFile(file, dto.ownerId);
     return fillObject(FileInfoRdo, fileInfo);
   }
 
@@ -64,7 +64,7 @@ export class FileController {
   }
 
   @ApiBody({
-    type: UploadFileDto,
+    type: DeleteFileDto,
     description: 'File to upload',
   })
   @ApiNotFoundResponse({
@@ -78,7 +78,7 @@ export class FileController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('delete')
-  public async deleteFile(dto: DeleteFileDto) {
-    await this.fileService.deleteFile(dto.ownerId, dto.fileId);
+  public async deleteFile(@Body() dto: DeleteFileDto) {
+    await this.fileService.deleteFile(dto.fileId, dto.ownerId);
   }
 }

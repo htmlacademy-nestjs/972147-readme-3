@@ -92,7 +92,7 @@ export class BlogPostController {
   @Get('get-count-posts/:authorId')
   public async getCountPosts(@Param('authorId') authorId: string) {
     const countPosts = await this.blogPostService.getPostsCountByAuthorId(authorId);
-    return fillObject(AuthorPostsCountRdo, { countPosts });
+    return fillObject(AuthorPostsCountRdo, { count: countPosts });
   }
 
   @ApiOkResponse({

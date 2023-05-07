@@ -98,6 +98,7 @@ export class BlogUserController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('subscribe/:userId')
+  @UseGuards(JwtAuthGuard)
   public async subscribeToUserUpdates(@Param('userId', MongoidValidationPipe) userId: string, @ExtractUser() token: TokenPayload | undefined): Promise<void> {
     if (!token?.sub) {
       throw new BadRequestException('User not provided');
@@ -116,6 +117,7 @@ export class BlogUserController {
     description: 'User not found',
   })
   @Delete('unsubscribe/:userId')
+  @UseGuards(JwtAuthGuard)
   public async unsubscribeFromUser(@Param('userId', MongoidValidationPipe) userId: string, @ExtractUser() token: TokenPayload | undefined): Promise<void> {
     if (!token?.sub) {
       throw new BadRequestException('User not provided');

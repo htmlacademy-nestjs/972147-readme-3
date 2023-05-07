@@ -31,7 +31,7 @@ export class BlogPostService {
     }
 
     if (post.authorId === dto.authorId) {
-      await this.repository.delete(post.id);
+      return await this.repository.delete(post.id);
     }
 
     throw new BadRequestException();

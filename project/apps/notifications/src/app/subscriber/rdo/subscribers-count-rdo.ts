@@ -1,9 +1,9 @@
 import { Expose } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class AuthorPostsCountRdo {
+export class SubscribersCountRdo {
   @ApiProperty({
-    description: 'Number of posts',
+    description: 'Number of subscribers',
     example: 12
   })
   @Expose()
