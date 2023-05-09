@@ -50,7 +50,7 @@ export class BlogUserController {
 
   @ApiCreatedResponse({
     type: UserRdo,
-    description: 'User has been successfully registered.',
+    description: 'User has been successfully created.',
   })
   @ApiConflictResponse({
     status: HttpStatus.CONFLICT,
@@ -72,7 +72,7 @@ export class BlogUserController {
     description: 'Old password is incorrect',
   })
   @ApiBadRequestResponse({
-    description: 'User not provided or invalid data',
+    description: 'User not provided in token or invalid data',
   })
   @ApiNotFoundResponse({
     description: 'User not found',

@@ -15,7 +15,7 @@ export class SubscriberController {
   @ApiOkResponse({
     type: String,
     isArray: true,
-    description: 'Get subscriptions by user id',
+    description: 'User subscriptions - Ids of users',
   })
   @ApiNotFoundResponse({
     description: 'User not found',
@@ -28,7 +28,7 @@ export class SubscriberController {
   @ApiOkResponse({
     type: Subscriber,
     isArray: true,
-    description: 'Get subscribers by user id',
+    description: 'User subscribers',
   })
   @Get(':userId/subscribers')
   public async getSubscribers(@Param('userId') userId: string) {
@@ -37,7 +37,7 @@ export class SubscriberController {
 
   @ApiOkResponse({
     type: Number,
-    description: 'Get count user subscribers',
+    description: 'Count of user subscribers',
   })
   @Get(':userId/count-subscribers')
   public async getCountSubscribers(@Param('userId') userId: string) {
@@ -121,9 +121,12 @@ export class SubscriberController {
   public async notifyNewPosts(subscriberId: string) {
     const subscriber = await this.subscriberService.getSubscriber(subscriberId);
     if (!subscriber) {
-      throw new NotFoundException('Subscriber not found');
+      return new NotFoundException('Subscriber not found');
     }
     const newPosts = await this.subscriberService.getNewPosts(subscriber);
+    if (newPosts.length === 0) {
+      return ;
+    }
     await this.mailService.sendNotifyOnNewPosts(subscriber, newPosts);
     await this.subscriberService.deleteNewPostsBySubscriber(subscriber);
     return;

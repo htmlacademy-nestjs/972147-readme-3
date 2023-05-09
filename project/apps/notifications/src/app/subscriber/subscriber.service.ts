@@ -11,7 +11,7 @@ export class SubscriberService {
   public async getUserSubscriptions(userId: string): Promise<string[]> {
     const subscriber = await this.subscriberRepository.findByUserId(userId);
 
-    if (!subscriber?.id) {
+    if (!subscriber) {
       throw new NotFoundException();
     }
 

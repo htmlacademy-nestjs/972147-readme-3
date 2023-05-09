@@ -17,6 +17,7 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix);
 
   const configService = app.get(ConfigService);
+  const host = configService.get('application.host');
   const port = configService.get('application.port');
 
   const document = SwaggerModule.createDocument(app, config);
@@ -27,9 +28,8 @@ async function bootstrap() {
   }));
 
   await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
-  );
+  Logger.log(`🚀 <<POSTS>> app is running on: http://${host}:${port}/${globalPrefix}`);
+  Logger.log(`🚀 <<POSTS>> documentation on: http://${host}:${port}/spec`);
 }
 
 bootstrap();

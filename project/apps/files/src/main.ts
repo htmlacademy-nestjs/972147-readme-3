@@ -18,12 +18,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('spec', app, document);
 
-
   const configService = app.get(ConfigService);
+  const host = configService.get('application.host');
   const port = configService.get('application.port');
 
   await app.listen(port);
-  Logger.log(`🚀 Application is running on: http://localhost:${port}`);
+  Logger.log(`🚀 <<FILES>> app is running on: http://localhost:${port}/${globalPrefix}`);
+  Logger.log(`🚀 <<FILES>> documentation on: http://localhost:${port}/spec`);
 }
 
 bootstrap();

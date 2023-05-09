@@ -39,9 +39,12 @@ export class BlogPostService {
 
   public async updatePost<T extends PostTypeEnum>(postId: string, dto: BlogPostDtoGeneric<T>) {
     const post = await this.repository.get(postId);
-
     if (!post) {
       throw new NotFoundException();
+    }
+
+    if (post.isRepost) {
+      throw new BadRequestException('Repost cannot be modified');
     }
 
     if (post.authorId === dto.authorId) {

@@ -1,0 +1,7 @@
+### User feed (list of posts)
+GET http://localhost:4000/api/feed?type=text&limit=10&page=1&sortBy=comments&sortDirection=desc&search=text HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+
+### Send new posts to email
+GET http://localhost:4000/api/feed/send-new-posts-to-email HTTP/1.1
+Authorization: Bearer AUTH_TOKEN

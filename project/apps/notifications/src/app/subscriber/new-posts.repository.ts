@@ -18,11 +18,11 @@ export class NewPostsRepository {
   }
 
   public async deleteManyNewPosts(newPostIds: string[]) {
-    return this.newPostModel.deleteMany({ _id: { $in: newPostIds }});
+    await this.newPostModel.deleteMany({ _id: { $in: newPostIds }}).exec();
   }
 
   public async deleteNewPostsBySubscriber(subscriber: Subscriber): Promise<void> {
-    this.newPostModel.deleteMany({ subscriberUserId: subscriber.userId });
+    await this.newPostModel.deleteMany( {subscriberUserId: subscriber.userId} ).exec();
   }
 
   public async deleteNewPostsByPostId(postId: string) {

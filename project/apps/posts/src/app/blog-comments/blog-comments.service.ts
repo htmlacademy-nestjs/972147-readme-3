@@ -30,11 +30,11 @@ export class BlogCommentsService {
       throw new NotFoundException();
     }
 
-    if (comment.authorId === dto.commentId) {
-      await this.repository.delete(dto.commentId);
+    if (comment.authorId !== dto.authorId) {
+      throw new BadRequestException();
     }
 
-    throw new BadRequestException();
+    return await this.repository.delete(dto.commentId);
   }
 
   public async updateComment(id: string, dto: UpdateCommentDto) {
@@ -44,10 +44,11 @@ export class BlogCommentsService {
       throw new NotFoundException();
     }
 
-    if (comment.authorId === dto.authorId) {
-      return await this.repository.update(id, dto);
+    if (comment.authorId !== dto.authorId) {
+      throw new BadRequestException();
     }
-    throw new BadRequestException();
+
+    return await this.repository.update(id, dto);
   }
 
   public async getCommentsList(query: BlogCommentQuery) {

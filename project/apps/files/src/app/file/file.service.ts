@@ -66,13 +66,12 @@ export class FileService {
 
   public async deleteFile(fileId: string, ownerId?: string) {
     const file = await this.findById(fileId);
-
     if (!file) {
       throw new NotFoundException();
     }
 
-    if (file.metadata?.ownwerId === ownerId) {
-      return this.bucket.delete(file._id);
+    if (file.metadata?.ownerId === ownerId) {
+      return await this.bucket.delete(file._id);
     }
 
     throw new NotFoundException();

@@ -1,0 +1,105 @@
+### Create a new VIDEO post
+POST http://localhost:4000/api/posts HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Some funny video from youtube",
+  "linkUrl": "https://www.youtube.com/watch?v=9bZkp7q19f0",
+  "type": "video"
+}
+
+### Create a new TEXT post
+POST http://localhost:4000/api/posts HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Some text name of the post",
+  "announceText": "This is the announce text of the post, it will be shown on post list page",
+  "mainText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl quis ultricies ultricies, nunc nisl aliquam nunc, vitae a",
+  "type": "text"
+}
+
+### Create a QUOTE post
+POST http://localhost:4000/api/posts HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+Content-Type: application/json
+
+{
+  "text": "Some text name of the post, it will be shown on post list page",
+  "quoteAuthor": "John Doe",
+  "type": "quote"
+}
+
+### Create a LINK post
+POST http://localhost:4000/api/posts HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+Content-Type: application/json
+
+{
+  "linkUrl": "https://www.youtube.com/watch?v=9bZkp7q19f0",
+  "description": "Funny link description",
+  "type": "link"
+}
+
+### Update a post
+POST http://localhost:4000/api/posts/POST_ID HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+Content-Type: application/json
+
+{
+  "linkUrl": "https://www.youtube.com/watch?v=Wj5cEMfzGjQ",
+  "name": "Funny cat video from youtube",
+  "type": "video"
+}
+
+### Get a post
+GET http://localhost:4000/api/posts/POST_ID HTTP/1.1
+
+### List posts
+GET http://localhost:4000/api/posts?type=text&limit=10&page=1&sortBy=comments&sortDirection=desc&search=text HTTP/1.1
+
+### Make repost
+POST http://localhost:4000/api/posts/repost/POST_ID HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+
+### Delete a post
+DELETE http://localhost:4000/api/posts/POST_ID HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+
+
+
+### Like a post
+POST http://localhost:4000/api/likes/POST_ID HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+
+### Unlike a post
+DELETE http://localhost:4000/api/likes/POST_ID HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+
+
+### Comment a post
+POST http://localhost:4000/api/comments/POST_ID HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+Content-Type: application/json
+
+{
+  "text": "Some comment text"
+}
+
+### List comments
+GET http://localhost:4000/api/comments/list/POST_ID?limit=10&page=1&sortBy=createdAt&sortDirection=desc HTTP/1.1
+
+### Update comment a post
+POST http://localhost:4000/api/comments/update/COMMENT_ID HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
+Content-Type: application/json
+
+{
+  "text": "Another comment text"
+}
+
+### Delete comment a post
+DELETE http://localhost:4000/api/comments/COMMENT_ID HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
