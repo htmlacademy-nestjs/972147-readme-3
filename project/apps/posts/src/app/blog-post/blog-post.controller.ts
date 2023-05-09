@@ -10,10 +10,10 @@ import {
   ApiCreatedResponse,
   ApiExtraModels,
   ApiNotFoundResponse,
-  ApiOkResponse,
+  ApiOkResponse, ApiQuery,
   ApiTags,
-  getSchemaPath,
-} from '@nestjs/swagger';
+  getSchemaPath
+} from "@nestjs/swagger";
 import { PostDtoValidationPipe } from './pipes/post-dto-validation.pipe';
 import { BlogPostQuery } from './query/blog-post.query';
 import { CreateRepostDto } from './dto/create-repost.dto';
@@ -88,29 +88,12 @@ export class BlogPostController {
 
   @ApiOkResponse({
     type: AuthorPostsCountRdo,
+    description: 'Count of posts by author id',
   })
   @Get('get-count-posts/:authorId')
   public async getCountPosts(@Param('authorId') authorId: string) {
     const countPosts = await this.blogPostService.getPostsCountByAuthorId(authorId);
-    return fillObject(AuthorPostsCountRdo, { countPosts });
-  }
-
-  @ApiOkResponse({
-    schema: oneofRdoSchemaResponse(),
-    description: 'One of the post types',
-  })
-  @ApiBody({
-    schema: oneofDtoSchemaResponse(),
-    description: 'One of the post dto types',
-  })
-  @Post(':id')
-  @HttpCode(HttpStatus.OK)
-  public async updatePost<T extends PostTypeEnum>(@Param('id', ParseUUIDPipe) postId: string, @Body(PostDtoValidationPipe) dto: BlogPostDtoGeneric<T>) {
-    const post = await this.blogPostService.updatePost(postId, dto);
-    if (post.status === 'draft') {
-      await this.notifyService.deleteNewPost(post.id);
-    }
-    return fillObject(getBlogPostRdo(post.type), post);
+    return fillObject(AuthorPostsCountRdo, { count: countPosts });
   }
 
   @ApiBody({
@@ -133,6 +116,74 @@ export class BlogPostController {
     await this.notifyService.deleteNewPost(dto.postId);
   }
 
+  @ApiOkResponse({
+    schema: oneofRdoSchemaResponse(),
+    description: 'One of the post types',
+  })
+  @ApiBody({
+    schema: oneofDtoSchemaResponse(),
+    description: 'One of the post dto types',
+  })
+  @Post(':id')
+  @HttpCode(HttpStatus.OK)
+  public async updatePost<T extends PostTypeEnum>(@Param('id', ParseUUIDPipe) postId: string, @Body(PostDtoValidationPipe) dto: BlogPostDtoGeneric<T>) {
+    const post = await this.blogPostService.updatePost(postId, dto);
+    if (post.status === 'draft') {
+      await this.notifyService.deleteNewPost(post.id);
+    }
+    return fillObject(getBlogPostRdo(post.type), post);
+  }
+
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Limit of posts. Default is 25',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    type: Number,
+    required: false,
+    description: 'Page of posts. Default is 1',
+    example: 2,
+  })
+  @ApiQuery({
+    name: 'type',
+    enum: PostTypeEnum,
+    required: false,
+    description: 'Type of posts',
+    example: PostTypeEnum.TEXT,
+  })
+  @ApiQuery({
+    name: 'authorIds',
+    type: String,
+    required: false,
+    description: 'Author ids',
+    isArray: true,
+    example: '1,2,3',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    type: String,
+    required: false,
+    description: 'Sort by. Default is published',
+    example: 'comments | likes | published',
+  })
+  @ApiQuery({
+    name: 'sortDirection',
+    type: String,
+    required: false,
+    description: 'Sort direction. Default is desc',
+    example: 'desc | asc',
+  })
+  @ApiQuery({
+    name: 'search',
+    type: String,
+    required: false,
+    description: 'Search by title',
+    example: 'title',
+  })
   @ApiOkResponse({
     schema: anyOfRdoSchemaResponse(),
     description: 'List of posts',

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { ArrayMaxSize, IsDate, IsNotEmpty, IsOptional, IsString, Length, Matches, NotContains } from "class-validator";
+import { ArrayMaxSize, IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, Length, Matches, NotContains } from 'class-validator';
+import { PostStatusEnum } from '@project/shared/app-types';
 
 export class PostDto {
   @ApiProperty({
@@ -21,13 +22,19 @@ export class PostDto {
   @Length(3, 10, { each: true })
   @NotContains(' ', { each: true })
   @ArrayMaxSize(8)
-  @Matches(/^D/, {
+  @Matches(/^\D/, {
     each: true,
     message: 'the first character of tag must not be a number',
   })
   @IsOptional()
   public tags?: string[];
 
+  @ApiProperty({
+    description: 'Status of the post',
+    example: PostStatusEnum.DRAFT,
+  })
+  @IsEnum(PostStatusEnum)
+  public status?: PostStatusEnum = PostStatusEnum.DRAFT;
 
   @ApiProperty({
     description: 'Unique identifier of the author',

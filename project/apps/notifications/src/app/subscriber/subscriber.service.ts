@@ -1,20 +1,17 @@
 import { SubscriberDto } from './dto/subscriber.dto';
 import { SubscriberRepository } from './subscriber.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { NewPost, Subscriber, UserSubscription } from "@project/shared/app-types";
-import { NewPostsRepository } from "./new-posts.repository";
+import { NewPost, Subscriber, UserSubscription } from '@project/shared/app-types';
+import { NewPostsRepository } from './new-posts.repository';
 
 @Injectable()
 export class SubscriberService {
-  constructor(
-    private readonly subscriberRepository: SubscriberRepository,
-    private readonly newPostsRepository: NewPostsRepository
-  ) {}
+  constructor(private readonly subscriberRepository: SubscriberRepository, private readonly newPostsRepository: NewPostsRepository) {}
 
   public async getUserSubscriptions(userId: string): Promise<string[]> {
     const subscriber = await this.subscriberRepository.findByUserId(userId);
 
-    if (!subscriber?.id) {
+    if (!subscriber) {
       throw new NotFoundException();
     }
 
@@ -72,7 +69,7 @@ export class SubscriberService {
   public async addSubscription(subscription: UserSubscription) {
     const subscriber = await this.subscriberRepository.findByUserId(subscription.fromUserId);
 
-    if (!subscriber?.id) {
+    if (!subscriber) {
       throw new NotFoundException();
     }
 
@@ -80,7 +77,7 @@ export class SubscriberService {
       return;
     }
 
-    return await this.subscriberRepository.update(subscriber.id, {
+    return await this.subscriberRepository.updateByUserId({
       ...subscriber,
       userSubscriptions: [...subscriber.userSubscriptions, subscription.toUserId],
     });
@@ -89,7 +86,7 @@ export class SubscriberService {
   public async deleteSubscription(subscription: UserSubscription) {
     const subscriber = await this.subscriberRepository.findByUserId(subscription.fromUserId);
 
-    if (!subscriber?.id) {
+    if (!subscriber) {
       throw new NotFoundException();
     }
 
@@ -97,7 +94,7 @@ export class SubscriberService {
       return;
     }
 
-    return await this.subscriberRepository.update(subscriber.id, {
+    return await this.subscriberRepository.updateByUserId({
       ...subscriber,
       userSubscriptions: subscriber.userSubscriptions.filter((id) => id !== subscription.toUserId),
     });
@@ -121,6 +118,6 @@ export class SubscriberService {
   }
 
   public async deleteNewPostsBySubscriber(subscriber: Subscriber): Promise<void> {
-    return this.newPostsRepository.deleteNewPostsBySubscriber(subscriber)
+    return this.newPostsRepository.deleteNewPostsBySubscriber(subscriber);
   }
 }

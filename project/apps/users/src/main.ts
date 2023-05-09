@@ -21,6 +21,7 @@ async function bootstrap() {
   SwaggerModule.setup('spec', app, document);
 
   const configService = app.get(ConfigService);
+  const host = configService.get('application.host');
   const port = configService.get('application.port');
 
   app.useGlobalPipes(new ValidationPipe({
@@ -28,12 +29,8 @@ async function bootstrap() {
   }));
 
   await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
-  );
-  Logger.log(
-    `🎯  Current mode: ${configService.get('application.environment')}`
-  )
+  Logger.log(`🚀 <<USERS>> app is running on: http://${host}:${port}/${globalPrefix}`);
+  Logger.log(`🚀 <<USERS>> documentation on: http://localhost:${port}/spec`);
 }
 
 bootstrap();

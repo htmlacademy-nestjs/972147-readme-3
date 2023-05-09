@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
-import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 import { BlogLikesService } from './blog-likes.service';
 import { LikeDto } from "./dto/like.dto";
 
@@ -8,6 +8,10 @@ import { LikeDto } from "./dto/like.dto";
 export class BlogLikesController {
   constructor(private readonly service: BlogLikesService) {}
 
+  @ApiBody({
+    type: LikeDto,
+    description: 'Like data',
+  })
   @ApiNotFoundResponse({
     description: 'Post not found',
   })
@@ -22,6 +26,10 @@ export class BlogLikesController {
     await this.service.likePost(dto);
   }
 
+  @ApiBody({
+    type: LikeDto,
+    description: 'Like data',
+  })
   @ApiNotFoundResponse({
     description: 'Post not found or like does not exist',
   })

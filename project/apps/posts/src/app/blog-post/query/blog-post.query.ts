@@ -23,7 +23,8 @@ export class BlogPostQuery {
   public type?: PostTypeEnum;
 
   @IsOptional()
-  @IsString({each: true})
+  @Transform(({ value }) => value?.split(','))
+  @IsString({ each: true })
   public authorIds?: string[];
 
   @Transform(({ value }) => value || DEFAULT_POST_SORT_BY)

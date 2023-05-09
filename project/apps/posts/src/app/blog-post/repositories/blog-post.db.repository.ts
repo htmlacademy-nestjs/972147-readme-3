@@ -9,13 +9,13 @@ import {
   PostLink as DBPostLink,
   PostQuote as DBPostQuote,
   PostStatus as DBPostStatus,
+  PostText as DBPostText, PostType,
   PostType as DBPostType,
-  PostText as DBPostText,
   PostVideo as DBPostVideo,
-  Tag as DBTag,
-} from '@prisma/client';
+  Tag as DBTag
+} from "@prisma/client";
 import { BlogPostQuery } from '../query/blog-post.query';
-import { CreateRepostDto } from "../dto/create-repost.dto";
+import { CreateRepostDto } from '../dto/create-repost.dto';
 
 type Nullable<T> = T | null;
 
@@ -71,6 +71,17 @@ export class BlogPostDbRepository implements BlogPostRepository {
     }
   }
 
+  private mapPostStatusToDBPostStatus(status: PostStatusEnum): DBPostStatus {
+    switch (status) {
+      case PostStatusEnum.DRAFT:
+        return DBPostStatus.DRAFT;
+      case PostStatusEnum.PUBLISHED:
+        return DBPostStatus.PUBLISHED;
+      default:
+        throw new Error(`Unknown DBPostStatus: ${status}`);
+    }
+  }
+
   private mapDBPostTypeToPostType(type: DBPostType): PostTypeEnum {
     switch (type) {
       case DBPostType.IMAGE:
@@ -114,6 +125,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
       authorId: dbPost.authorId,
       publishedAt: dbPost.publishedAt,
       status: this.mapDBPostStatusToPostStatus(dbPost.status),
+      originalAuthorId: dbPost.originalAuthorId ? dbPost.originalAuthorId : undefined,
       likesCount: dbPost._count.likes,
       commentsCount: dbPost._count.comments,
       tags: dbPost.tags.map((t) => t.name),
@@ -218,32 +230,48 @@ export class BlogPostDbRepository implements BlogPostRepository {
 
   public async list(query: BlogPostQuery): Promise<PostUnion[]> {
     const { sortBy, sortDirection, page, type, limit, authorIds, search } = query;
+    const postSearchParams = (queryType: PostTypeEnum) => {
+      if (!search) {
+        return undefined;
+      }
+      if (!type) {
+        return {
+          name: { search },
+        };
+      }
+      if (type === queryType) {
+        return {
+          name: { search },
+        };
+      }
+      return undefined;
+    }
     const dbPosts = await this.prisma.post.findMany({
       where: {
-        type: {
-          equals: type ? this.mapPostTypeToDBPostType(type) : undefined,
-        },
-        postVideo: search
+        type: type
           ? {
-              name: { contains: search },
+              equals: this.mapPostTypeToDBPostType(type),
             }
           : undefined,
-        postText: search
-          ? {
-              name: { contains: search },
-            }
-          : undefined,
+        postVideo: postSearchParams(PostTypeEnum.VIDEO),
+        postText: postSearchParams(PostTypeEnum.TEXT),
         status: DBPostStatus.PUBLISHED,
         authorId: authorIds ? { in: authorIds } : undefined,
       },
       orderBy: {
         publishedAt: sortBy === 'published' ? sortDirection : undefined,
-        likes: {
-          _count: sortBy === 'likes' ? sortDirection : undefined,
-        },
-        comments: {
-          _count: sortBy === 'comments' ? sortDirection : undefined,
-        },
+        likes:
+          sortBy === 'likes'
+            ? {
+                _count: sortDirection,
+              }
+            : undefined,
+        comments:
+          sortBy === 'comments'
+            ? {
+                _count: sortDirection,
+              }
+            : undefined,
       },
       include: {
         tags: true,
@@ -258,14 +286,19 @@ export class BlogPostDbRepository implements BlogPostRepository {
   }
 
   public async create<T extends PostTypeEnum>(dto: BlogPostDtoGeneric<T>): Promise<PostGeneric<T>> {
+    const tags = dto.tags ? [...new Set(dto.tags)] : [];
     const dbPost = await this.prisma.post.create({
       data: {
         authorId: dto.authorId,
         publishedAt: dto.publishedAt,
         type: this.mapPostTypeToDBPostType(dto.type),
         tags: {
-          create: dto.tags ? dto.tags.map((tag) => ({ name: tag })) : [],
+          connectOrCreate: tags.map((tag) => ({
+            where: { name: tag },
+            create: { name: tag },
+          })),
         },
+        status: dto.status ? this.mapPostStatusToDBPostStatus(dto.status) : DBPostStatus.PUBLISHED,
         ...this.prepareDbPostSchema(dto, 'create'),
       },
       include: {
@@ -285,23 +318,40 @@ export class BlogPostDbRepository implements BlogPostRepository {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      dbPost.postImageId && (await tx.postImage.delete({ where: { id: dbPost.postImageId } }));
-      dbPost.postLinkId && (await tx.postLink.delete({ where: { id: dbPost.postLinkId } }));
-      dbPost.postQuoteId && (await tx.postQuote.delete({ where: { id: dbPost.postQuoteId } }));
-      dbPost.postTextId && (await tx.postText.delete({ where: { id: dbPost.postTextId } }));
-      dbPost.postVideoId && (await tx.postVideo.delete({ where: { id: dbPost.postVideoId } }));
-      await tx.post.delete({ where: { id } });
+      await tx.post.delete({ where: { id: dbPost.id } });
+      if (dbPost.postImageId) {
+        await tx.postImage.delete({ where: { id: dbPost.postImageId } });
+      }
+      if (dbPost.postLinkId) {
+        await tx.postLink.delete({ where: { id: dbPost.postLinkId } });
+      }
+      if (dbPost.postQuoteId) {
+        await tx.postQuote.delete({ where: { id: dbPost.postQuoteId } });
+      }
+      if (dbPost.postTextId) {
+        await tx.postText.delete({ where: { id: dbPost.postTextId } });
+      }
+      if (dbPost.postVideoId) {
+        await tx.postVideo.delete({ where: { id: dbPost.postVideoId } });
+      }
     });
   }
 
   public async update<T extends PostTypeEnum>(id: string, dto: BlogPostDtoGeneric<T>): Promise<PostGeneric<T>> {
+    const tags = dto.tags ? [...new Set(dto.tags)] : [];
+    const currentPost = await this.get(id);
     const dbPost = await this.prisma.post.update({
       where: { id },
       data: {
         publishedAt: dto.publishedAt,
         tags: {
-          create: dto.tags ? dto.tags.map((tag) => ({ name: tag })) : [],
+          disconnect: currentPost?.tags?.map((tag) => ({ name: tag })),
+          connectOrCreate: tags.map((tag) => ({
+            where: { name: tag },
+            create: { name: tag },
+          })),
         },
+        status: dto.status ? this.mapPostStatusToDBPostStatus(dto.status) : undefined,
         ...this.prepareDbPostSchema(dto, 'update'),
       },
       include: {
@@ -315,7 +365,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
   }
 
   public async createRepost(dto: CreateRepostDto): Promise<PostUnion> {
-    const {postId, authorId} = dto;
+    const { postId, authorId } = dto;
     const dbPost = await this.prisma.post.findFirst({
       where: { id: postId },
       include: {
@@ -341,13 +391,17 @@ export class BlogPostDbRepository implements BlogPostRepository {
         publishedAt: new Date(),
         type: dbPost.type,
         tags: {
-          create: dbPost.tags.map((tag) => ({ name: tag.name })),
+          connectOrCreate: dbPost.tags.map((tag) => ({
+            where: { name: tag.name },
+            create: { name: tag.name },
+          })),
         },
         status: DBPostStatus.PUBLISHED,
-        postQuote: dbPost.postQuote ? { create: { ...dbPost.postQuote } } : undefined,
-        postImage: dbPost.postImage ? { create: { ...dbPost.postImage } } : undefined,
-        postText: dbPost.postText ? { create: { ...dbPost.postText } } : undefined,
-        postVideo: dbPost.postVideo ? { create: { ...dbPost.postVideo } } : undefined,
+        postQuote: dbPost.postQuote ? { create: { ...dbPost.postQuote, id: undefined } } : undefined,
+        postImage: dbPost.postImage ? { create: { ...dbPost.postImage, id: undefined } } : undefined,
+        postText: dbPost.postText ? { create: { ...dbPost.postText, id: undefined } } : undefined,
+        postVideo: dbPost.postVideo ? { create: { ...dbPost.postVideo, id: undefined } } : undefined,
+        postLink: dbPost.postLink ? { create: { ...dbPost.postLink, id: undefined } } : undefined,
       },
       include: {
         tags: true,

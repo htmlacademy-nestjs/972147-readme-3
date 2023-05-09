@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Get } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { fillObject } from '@project/util/util-core';
@@ -36,7 +36,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: 'Refresh token is incorrect',
   })
-  @Get('refresh')
+  @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
   public async refreshToken(@ExtractUser() payload: TokenPayload): Promise<LoginUserRdo> {
@@ -64,7 +64,7 @@ export class AuthController {
   @ApiOkResponse({
     description: 'User has been successfully logged out.',
   })
-  @Get('logout')
+  @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   public async logout(@ExtractUser() payload: TokenPayload) {
@@ -77,7 +77,7 @@ export class AuthController {
   @ApiOkResponse({
     description: 'User has been successfully logged out from all devices.',
   })
-  @Get('logout-all')
+  @Post('logout-all')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   public async logoutAll(@ExtractUser() payload: TokenPayload) {

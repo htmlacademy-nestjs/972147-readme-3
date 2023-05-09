@@ -40,6 +40,7 @@ export class AuthService {
     const accessTokenId = randomUUID();
     const refreshTokenId = randomUUID();
     const payload: TokenPayload = { sub: id, accessTokenId, refreshTokenId };
+
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('jwt.accessTokenSecret'),
       expiresIn: this.configService.get<string>('jwt.accessTokenExpiresIn'),

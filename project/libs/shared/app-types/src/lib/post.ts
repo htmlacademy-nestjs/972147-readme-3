@@ -18,6 +18,8 @@ export abstract class Post {
 
   public isRepost!: boolean;
 
+  public originalAuthorId?: string;
+
   public likesCount!: number;
 
   public commentsCount!: number;

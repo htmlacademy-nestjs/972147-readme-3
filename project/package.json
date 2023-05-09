@@ -1,12 +1,13 @@
 {
-  "name": "project",
-  "version": "0.0.0",
+  "name": "readme",
+  "version": "1.0.0",
   "license": "MIT",
   "scripts": {},
   "private": true,
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "3.6.0",
     "@nestjs-modules/mailer": "1.8.1",
+    "@nestjs/axios": "^2.0.0",
     "@nestjs/cache-manager": "^1.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "2.3.1",

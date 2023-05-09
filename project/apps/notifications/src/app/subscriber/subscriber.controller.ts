@@ -1,10 +1,12 @@
 import { SubscriberDto } from './dto/subscriber.dto';
 import { SubscriberService } from './subscriber.service';
-import { Controller, Get, NotFoundException } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from "@nestjs/common";
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { NewPost, RabbitmqRoutingEnum, Subscriber, UserSubscription } from '@project/shared/app-types';
 import { MailService } from '../mail/mail.service';
 import { ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
+import { fillObject } from "@project/util/util-core";
+import { SubscribersCountRdo } from "./rdo/subscribers-count-rdo";
 
 @Controller()
 export class SubscriberController {
@@ -13,34 +15,34 @@ export class SubscriberController {
   @ApiOkResponse({
     type: String,
     isArray: true,
-    description: 'Get subscriptions by user id',
+    description: 'User subscriptions - Ids of users',
   })
   @ApiNotFoundResponse({
     description: 'User not found',
   })
   @Get(':userId/subscriptions')
-  public async getSubscriptions(userId: string) {
+  public async getSubscriptions(@Param('userId') userId: string) {
     return this.subscriberService.getUserSubscriptions(userId);
   }
 
   @ApiOkResponse({
     type: Subscriber,
     isArray: true,
-    description: 'Get subscribers by user id',
+    description: 'User subscribers',
   })
   @Get(':userId/subscribers')
-  public async getSubscribers(userId: string) {
+  public async getSubscribers(@Param('userId') userId: string) {
     return this.subscriberService.getUserSubscribers(userId);
   }
 
   @ApiOkResponse({
     type: Number,
-    description: 'Get count user subscribers',
+    description: 'Count of user subscribers',
   })
   @Get(':userId/count-subscribers')
-  public async getCountSubscribers(userId: string) {
+  public async getCountSubscribers(@Param('userId') userId: string) {
     const subscribers = await this.subscriberService.getUserSubscribers(userId);
-    return subscribers.length;
+    return fillObject(SubscribersCountRdo, { count: subscribers.length });
   }
 
   @RabbitSubscribe({
@@ -50,6 +52,7 @@ export class SubscriberController {
   public async createSubscriber(subscriber: SubscriberDto) {
     await this.subscriberService.addSubscriber(subscriber);
     await this.mailService.sendNotifyOnSubscribe(subscriber);
+    return;
   }
 
   @RabbitSubscribe({
@@ -58,6 +61,7 @@ export class SubscriberController {
   })
   public async updateSubscriber(subscriber: SubscriberDto) {
     await this.subscriberService.updateSubscriber(subscriber);
+    return;
   }
 
   @RabbitSubscribe({
@@ -68,6 +72,7 @@ export class SubscriberController {
     const subscriber = await this.subscriberService.getSubscriber(userId);
     await this.subscriberService.deleteSubscriber(subscriber.userId);
     await this.mailService.sendNotifyOnUnsubscribe(subscriber);
+    return;
   }
 
   @RabbitSubscribe({
@@ -76,6 +81,7 @@ export class SubscriberController {
   })
   public async addSubscription(subscription: UserSubscription) {
     await this.subscriberService.addSubscription(subscription);
+    return;
   }
 
   @RabbitSubscribe({
@@ -87,6 +93,7 @@ export class SubscriberController {
     const subscriber = await this.subscriberService.getSubscriber(subscription.fromUserId);
     const newPosts = await this.subscriberService.getNewPosts(subscriber);
     await this.subscriberService.deleteManyNewPosts(newPosts.filter((post) => post.authorId === subscription.toUserId).map((p) => p.id));
+    return;
   }
 
   @RabbitSubscribe({
@@ -95,6 +102,7 @@ export class SubscriberController {
   })
   public async addNewPost(post: NewPost) {
     await this.subscriberService.addNewPost(post);
+    return;
   }
 
   @RabbitSubscribe({
@@ -103,6 +111,7 @@ export class SubscriberController {
   })
   public async deleteNewPost(postId: string) {
     await this.subscriberService.deleteNewPost(postId);
+    return;
   }
 
   @RabbitSubscribe({
@@ -112,10 +121,14 @@ export class SubscriberController {
   public async notifyNewPosts(subscriberId: string) {
     const subscriber = await this.subscriberService.getSubscriber(subscriberId);
     if (!subscriber) {
-      throw new NotFoundException('Subscriber not found');
+      return new NotFoundException('Subscriber not found');
     }
     const newPosts = await this.subscriberService.getNewPosts(subscriber);
+    if (newPosts.length === 0) {
+      return ;
+    }
     await this.mailService.sendNotifyOnNewPosts(subscriber, newPosts);
     await this.subscriberService.deleteNewPostsBySubscriber(subscriber);
+    return;
   }
 }

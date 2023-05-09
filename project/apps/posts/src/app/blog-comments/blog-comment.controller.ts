@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from "@nestjs/common";
-import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query, Req } from "@nestjs/common";
+import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { BlogCommentsService } from './blog-comments.service';
 import { fillObject } from '@project/util/util-core';
 import { CommentRdo } from './rdo/comment.rdo';
@@ -26,27 +26,20 @@ export class BlogCommentController {
     return fillObject(CommentRdo, comment);
   }
 
+  @ApiBody({
+    type: CreateCommentDto,
+    description: 'Comment data',
+  })
   @ApiCreatedResponse({
     type: CommentRdo,
     description: 'Comment has been successfully created.',
   })
+  @ApiNotFoundResponse({
+    description: 'Post not found',
+  })
   @Post('')
   public async createComment(@Body() dto: CreateCommentDto) {
     const comment = await this.service.createComment(dto);
-    return fillObject(CommentRdo, comment);
-  }
-
-  @ApiBody({
-    type: UpdateCommentDto,
-    description: 'Comment data',
-  })
-  @ApiOkResponse({
-    type: CommentRdo,
-    description: 'Comment has been successfully updated.',
-  })
-  @Post(':id/update')
-  public async updateComment(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCommentDto) {
-    const comment = await this.service.updateComment(id, dto);
     return fillObject(CommentRdo, comment);
   }
 
@@ -69,6 +62,41 @@ export class BlogCommentController {
     await this.service.deleteComment(dto);
   }
 
+  @ApiBody({
+    type: UpdateCommentDto,
+    description: 'Comment data',
+  })
+  @ApiNotFoundResponse({
+    description: 'Comment not found',
+  })
+  @ApiOkResponse({
+    type: CommentRdo,
+    description: 'Comment has been successfully updated.',
+  })
+  @Post(':id')
+  public async updateComment(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCommentDto) {
+    const comment = await this.service.updateComment(id, dto);
+    return fillObject(CommentRdo, comment);
+  }
+
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Limit of comments. Default is 50',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page of comments. Default is 1',
+  })
+  @ApiQuery({
+    name: 'postId',
+    required: true,
+    type: String,
+    description: 'Post id',
+  })
   @ApiOkResponse({
     type: CommentRdo,
     description: 'Comments has been successfully retrieved.',

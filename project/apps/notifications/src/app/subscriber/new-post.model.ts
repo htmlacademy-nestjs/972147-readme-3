@@ -19,9 +19,6 @@ export class NewPostModel extends Document implements NewPost {
   public postId!: string;
 
   @Prop({ required: true })
-  public title!: string;
-
-  @Prop({ required: true })
   public postLink!: string;
 
   @Prop({ required: true })

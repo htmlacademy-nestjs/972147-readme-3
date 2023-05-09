@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, PostType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -15,6 +15,31 @@ async function fillDb() {
           imageFileId: 'fakeImageFileId',
         },
       },
+      type: PostType.IMAGE,
+      comments: {
+        create: [
+          {
+            authorId: fakeAuthorId,
+            text: 'Comment image 1',
+          },
+          {
+            authorId: fakeAuthorId,
+            text: 'Comment image 2',
+          },
+        ],
+      },
+      tags: {
+        connectOrCreate: [
+          {
+            where: { name: 'tag1' },
+            create: { name: 'tag1' },
+          },
+          {
+            where: { name: 'tag2' },
+            create: { name: 'tag2' },
+          },
+        ],
+      },
     },
   });
   await prisma.post.upsert({
@@ -27,6 +52,31 @@ async function fillDb() {
           linkUrl: 'https://google.com',
           description: 'Google',
         },
+      },
+      type: PostType.LINK,
+      comments: {
+        create: [
+          {
+            authorId: fakeAuthorId,
+            text: 'Comment link 1',
+          },
+          {
+            authorId: fakeAuthorId,
+            text: 'Comment link 2',
+          },
+        ],
+      },
+      tags: {
+        connectOrCreate: [
+          {
+            where: { name: 'tag3' },
+            create: { name: 'tag4' },
+          },
+          {
+            where: { name: 'tag2' },
+            create: { name: 'tag2' },
+          },
+        ],
       },
     },
   });
@@ -42,6 +92,31 @@ async function fillDb() {
           name: 'Post name',
         },
       },
+      type: PostType.TEXT,
+      comments: {
+        create: [
+          {
+            authorId: fakeAuthorId,
+            text: 'Comment text 1',
+          },
+          {
+            authorId: fakeAuthorId,
+            text: 'Comment text 2',
+          },
+        ],
+      },
+      tags: {
+        connectOrCreate: [
+          {
+            where: { name: 'tag5' },
+            create: { name: 'tag5' },
+          },
+          {
+            where: { name: 'tag2' },
+            create: { name: 'tag2' },
+          },
+        ],
+      },
     },
   });
   await prisma.post.upsert({
@@ -55,6 +130,7 @@ async function fillDb() {
           name: 'Funny video',
         },
       },
+      type: PostType.VIDEO
     },
   });
   await prisma.post.upsert({
@@ -68,6 +144,7 @@ async function fillDb() {
           text: 'Text',
         },
       },
+      type: PostType.QUOTE
     },
   });
   console.info('🤘️ Database was filled');
