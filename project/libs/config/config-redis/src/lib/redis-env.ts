@@ -1,8 +1,10 @@
 import { IsNotEmpty, IsNumber, IsString, Max, Min } from "class-validator";
 import { RedisConfig } from "./redis.config";
 
-const MIN_PORT = 0;
-const MAX_PORT = 65535;
+enum Port {
+  MIN = 0,
+  MAX = 65535,
+}
 
 export class RedisEnv implements RedisConfig {
   @IsNotEmpty()
@@ -14,7 +16,7 @@ export class RedisEnv implements RedisConfig {
   public password!: string;
 
   @IsNumber()
-  @Min(MIN_PORT)
-  @Max(MAX_PORT)
+  @Min(Port.MIN)
+  @Max(Port.MAX)
   public port!: number;
 }

@@ -110,6 +110,14 @@ export class PostsController {
     description: 'Search by title',
     example: 'title',
   })
+  @ApiQuery({
+    name: 'tags',
+    type: String,
+    required: false,
+    description: 'Tags',
+    isArray: true,
+    example: 'love,meta,internet',
+  })
   @ApiOkResponse({
     schema: anyOfRdoSchemaResponse(),
     description: 'List of posts',
@@ -119,6 +127,18 @@ export class PostsController {
   public async getPosts(@Req() req: Request) {
     const query = Object.entries(req.query).map(([key, value]) => `${key}=${value}`).join('&');
     const { data: postsData } = await this.httpService.axiosRef.get(this.mkPostsUrl(`?${query}`));
+
+    return postsData;
+  }
+  @ApiOkResponse({
+    schema: anyOfRdoSchemaResponse(),
+    description: 'List of posts',
+    isArray: true,
+  })
+  @UseGuards(CheckAuthGuard)
+  @Get('drafts')
+  public async drafts(@ExtractUser() user: UserId) {
+    const { data: postsData } = await this.httpService.axiosRef.get(this.mkPostsUrl(`drafts/${user.userId}`));
 
     return postsData;
   }

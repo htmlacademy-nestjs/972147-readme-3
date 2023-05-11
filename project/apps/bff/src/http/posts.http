@@ -44,14 +44,15 @@ Content-Type: application/json
 }
 
 ### Update a post
-POST http://localhost:4000/api/posts/POST_ID HTTP/1.1
+POST http://localhost:4000/api/posts/180b494c-d71f-49b5-9ae8-ec6b94418eb9 HTTP/1.1
 Authorization: Bearer AUTH_TOKEN
 Content-Type: application/json
 
 {
   "linkUrl": "https://www.youtube.com/watch?v=Wj5cEMfzGjQ",
   "name": "Funny cat video from youtube",
-  "type": "video"
+  "type": "video",
+  "status": "draft"
 }
 
 ### Get a post
@@ -59,6 +60,10 @@ GET http://localhost:4000/api/posts/POST_ID HTTP/1.1
 
 ### List posts
 GET http://localhost:4000/api/posts?type=text&limit=10&page=1&sortBy=comments&sortDirection=desc&search=text HTTP/1.1
+
+### List current user drafts
+GET http://localhost:4000/api/posts/drafts HTTP/1.1
+Authorization: Bearer AUTH_TOKEN
 
 ### Make repost
 POST http://localhost:4000/api/posts/repost/POST_ID HTTP/1.1

@@ -65,4 +65,8 @@ export class BlogPostService {
   public async getPostsCountByAuthorId(authorId: string) {
     return await this.repository.getCountByAuthorId(authorId);
   }
+
+  public async getDrafts(authorId: string) {
+    return await this.repository.getDrafts(authorId);
+  }
 }

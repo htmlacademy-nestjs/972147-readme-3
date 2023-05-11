@@ -83,6 +83,14 @@ export class FeedController {
     description: 'Search by title',
     example: 'title',
   })
+  @ApiQuery({
+    name: 'tags',
+    type: String,
+    required: false,
+    description: 'Tags',
+    isArray: true,
+    example: 'love,meta,internet',
+  })
   @ApiOkResponse({
     schema: anyOfRdoSchemaResponse(),
     description: 'List of posts',
@@ -92,6 +100,7 @@ export class FeedController {
   @UseGuards(CheckAuthGuard)
   public async getFeed(@ExtractUser() user: UserId, @Req() req: Request) {
     const { data: subscriptions } = await this.httpService.axiosRef.get(this.mkNotificationsUrl(`${user.userId}/subscriptions`));
+    subscriptions.push(user.userId);
     const query = Object.entries(req.query).map(([key, value]) => `${key}=${value}`).join('&');
     const { data: postsData } = await this.httpService.axiosRef.get(this.mkPostsUrl(`?${query}&authorIds=${subscriptions.join(',')}`));
 

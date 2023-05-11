@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Get, HttpException, HttpStatus, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, HttpCode, Get, HttpStatus, Param, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express, Response } from 'express';
 import 'multer';
@@ -53,10 +53,7 @@ export class FileController {
   })
   async downloadFile(@Param('id', MongoidValidationPipe) id: string, @Res() res: Response) {
     const file = await this.fileService.findById(id);
-    const filestream = await this.fileService.downloadFile(id);
-    if (!filestream) {
-      throw new HttpException('An error occurred while retrieving file', HttpStatus.EXPECTATION_FAILED);
-    }
+    const filestream = this.fileService.downloadFile(id);
 
     res.header('Content-Type', file.contentType);
     res.header('Content-Disposition', 'attachment; filename=' + file.filename);
