@@ -1,8 +1,10 @@
 import { IsNotEmpty, IsNumber, IsString, Max, Min } from 'class-validator';
 import { RabbitmqConfig } from "./rabbitmq.config";
 
-const MIN_PORT = 0;
-const MAX_PORT = 65535;
+enum Port {
+  MIN = 0,
+  MAX = 65535,
+}
 
 export class RabbitmqEnv implements RabbitmqConfig {
   @IsNotEmpty()
@@ -18,8 +20,8 @@ export class RabbitmqEnv implements RabbitmqConfig {
   public password!: string;
 
   @IsNumber()
-  @Min(MIN_PORT)
-  @Max(MAX_PORT)
+  @Min(Port.MIN)
+  @Max(Port.MAX)
   public port!: number;
 
   @IsNotEmpty()

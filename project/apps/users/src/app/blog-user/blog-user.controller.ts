@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards, Delete } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards, Delete } from '@nestjs/common';
 import { BlogUserService } from './blog-user.service';
 import { fillObject } from '@project/util/util-core';
 import { UserRdo } from './rdo/user.rdo';
@@ -26,12 +26,9 @@ export class BlogUserController {
   @Get('profile')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  public async getLoggedUserProfile(@ExtractUser() user: TokenPayload | undefined): Promise<UserRdo> {
-    if (user?.sub) {
-      const loggedUser = await this.blogUserService.getUser(user.sub);
-      return fillObject(UserRdo, loggedUser);
-    }
-    throw new BadRequestException('User not provided or invalid data');
+  public async getLoggedUserProfile(@ExtractUser() user: TokenPayload): Promise<UserRdo> {
+    const loggedUser = await this.blogUserService.getUser(user.sub);
+    return fillObject(UserRdo, loggedUser);
   }
 
   @ApiOkResponse({
@@ -80,10 +77,7 @@ export class BlogUserController {
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  public async changePassword(@Body() dto: UpdatePasswordDto, @ExtractUser() user: TokenPayload | undefined): Promise<void> {
-    if (!user?.sub) {
-      throw new BadRequestException('User not provided');
-    }
+  public async changePassword(@Body() dto: UpdatePasswordDto, @ExtractUser() user: TokenPayload): Promise<void> {
     await this.blogUserService.updatePassword(user.sub, dto);
   }
 
@@ -99,10 +93,7 @@ export class BlogUserController {
   @HttpCode(HttpStatus.OK)
   @Post('subscribe/:userId')
   @UseGuards(JwtAuthGuard)
-  public async subscribeToUserUpdates(@Param('userId', MongoidValidationPipe) userId: string, @ExtractUser() token: TokenPayload | undefined): Promise<void> {
-    if (!token?.sub) {
-      throw new BadRequestException('User not provided');
-    }
+  public async subscribeToUserUpdates(@Param('userId', MongoidValidationPipe) userId: string, @ExtractUser() token: TokenPayload): Promise<void> {
     const { id } = await this.blogUserService.getUser(token.sub);
     await this.notifyService.subscribeToUser({ fromUserId: id, toUserId: userId });
   }
@@ -118,10 +109,7 @@ export class BlogUserController {
   })
   @Delete('unsubscribe/:userId')
   @UseGuards(JwtAuthGuard)
-  public async unsubscribeFromUser(@Param('userId', MongoidValidationPipe) userId: string, @ExtractUser() token: TokenPayload | undefined): Promise<void> {
-    if (!token?.sub) {
-      throw new BadRequestException('User not provided');
-    }
+  public async unsubscribeFromUser(@Param('userId', MongoidValidationPipe) userId: string, @ExtractUser() token: TokenPayload): Promise<void> {
     const { id } = await this.blogUserService.getUser(token.sub);
     await this.notifyService.unsubscribeFromUser({ fromUserId: id, toUserId: userId });
   }

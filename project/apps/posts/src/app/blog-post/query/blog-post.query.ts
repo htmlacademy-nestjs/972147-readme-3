@@ -27,6 +27,11 @@ export class BlogPostQuery {
   @IsString({ each: true })
   public authorIds?: string[];
 
+  @IsOptional()
+  @Transform(({ value }) => value?.split(','))
+  @IsString({ each: true })
+  public tags?: string[];
+
   @Transform(({ value }) => value || DEFAULT_POST_SORT_BY)
   @IsOptional()
   @IsIn(['comments', 'likes', 'published'])

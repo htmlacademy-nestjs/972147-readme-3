@@ -9,10 +9,10 @@ import {
   PostLink as DBPostLink,
   PostQuote as DBPostQuote,
   PostStatus as DBPostStatus,
-  PostText as DBPostText, PostType,
+  PostText as DBPostText,
   PostType as DBPostType,
   PostVideo as DBPostVideo,
-  Tag as DBTag
+  Tag as DBTag,
 } from "@prisma/client";
 import { BlogPostQuery } from '../query/blog-post.query';
 import { CreateRepostDto } from '../dto/create-repost.dto';
@@ -81,6 +81,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
         throw new Error(`Unknown DBPostStatus: ${status}`);
     }
   }
+
 
   private mapDBPostTypeToPostType(type: DBPostType): PostTypeEnum {
     switch (type) {
@@ -229,23 +230,18 @@ export class BlogPostDbRepository implements BlogPostRepository {
   }
 
   public async list(query: BlogPostQuery): Promise<PostUnion[]> {
-    const { sortBy, sortDirection, page, type, limit, authorIds, search } = query;
+    const { sortBy, sortDirection, page, type, limit, authorIds, search, tags } = query;
     const postSearchParams = (queryType: PostTypeEnum) => {
       if (!search) {
         return undefined;
       }
-      if (!type) {
+      if (!type || type === queryType) {
         return {
-          name: { search },
-        };
-      }
-      if (type === queryType) {
-        return {
-          name: { search },
+          name: { search: search },
         };
       }
       return undefined;
-    }
+    };
     const dbPosts = await this.prisma.post.findMany({
       where: {
         type: type
@@ -257,6 +253,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
         postText: postSearchParams(PostTypeEnum.TEXT),
         status: DBPostStatus.PUBLISHED,
         authorId: authorIds ? { in: authorIds } : undefined,
+        tags: tags ? { some: { name: { in: tags } } } : undefined,
       },
       orderBy: {
         publishedAt: sortBy === 'published' ? sortDirection : undefined,
@@ -280,6 +277,22 @@ export class BlogPostDbRepository implements BlogPostRepository {
       },
       take: limit,
       skip: page > 0 ? limit * (page - 1) : undefined,
+    });
+
+    return dbPosts.map((dbPost) => this.mapDBPostWithPostToPostUnion(dbPost));
+  }
+
+  public async getDrafts(authorId: string): Promise<PostUnion[]> {
+    const dbPosts = await this.prisma.post.findMany({
+      where: {
+        status: DBPostStatus.DRAFT,
+        authorId: authorId,
+      },
+      include: {
+        tags: true,
+        ...this.getIncludedPosts(),
+        ...this.getIncludedCount(),
+      },
     });
 
     return dbPosts.map((dbPost) => this.mapDBPostWithPostToPostUnion(dbPost));

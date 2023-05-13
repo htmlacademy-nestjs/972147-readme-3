@@ -5,10 +5,12 @@ import { BlogPostDtoGeneric, ImagePostDto, LinkPostDto, QuotePostDto, TextPostDt
 import { PostTypeEnum } from '@project/shared/app-types';
 import { ValidatorOptions } from 'class-validator/types/validation/ValidatorOptions';
 
+const EXPECTED_ARGUMENT_TYPE = 'body';
+
 @Injectable()
 export class PostDtoValidationPipe implements PipeTransform {
   public async transform(value: BlogPostDtoGeneric<PostTypeEnum>, { type }: ArgumentMetadata) {
-    if (type !== 'body') {
+    if (type !== EXPECTED_ARGUMENT_TYPE) {
       throw new Error('This pipe must used only body params!');
     }
 

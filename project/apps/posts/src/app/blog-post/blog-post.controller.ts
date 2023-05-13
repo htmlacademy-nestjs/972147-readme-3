@@ -42,6 +42,16 @@ export class BlogPostController {
   constructor(private readonly blogPostService: BlogPostService, private readonly notifyService: NotifyService) {}
 
   @ApiOkResponse({
+    schema: anyOfRdoSchemaResponse(),
+    description: 'List of posts',
+    isArray: true,
+  })
+  @Get('drafts/:authorId')
+  public async getDrafts(@Param('authorId') authorId: string) {
+    return await this.blogPostService.getDrafts(authorId);
+  }
+
+  @ApiOkResponse({
     schema: oneofRdoSchemaResponse(),
     description: 'One of the post rdo types',
   })
@@ -162,6 +172,14 @@ export class BlogPostController {
     description: 'Author ids',
     isArray: true,
     example: '1,2,3',
+  })
+  @ApiQuery({
+    name: 'tags',
+    type: String,
+    required: false,
+    description: 'Tags',
+    isArray: true,
+    example: 'love,meta,internet',
   })
   @ApiQuery({
     name: 'sortBy',

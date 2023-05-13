@@ -1,21 +1,21 @@
 {
-  "name": "config-config-common",
+  "name": "config-bff",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/config/config-common/src",
+  "sourceRoot": "libs/config/config-bff/src",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/config/config-common/**/*.ts"]
+        "lintFilePatterns": ["libs/config/config-bff/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "libs/config/config-common/jest.config.ts",
+        "jestConfig": "libs/config/config-bff/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

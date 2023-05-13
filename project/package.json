@@ -2,7 +2,9 @@
   "name": "readme",
   "version": "1.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "lint": "nx run-many --target=lint --all"
+  },
   "private": true,
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "3.6.0",

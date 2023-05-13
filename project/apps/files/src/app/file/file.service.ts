@@ -60,7 +60,7 @@ export class FileService {
     };
   }
 
-  public async downloadFile(id: string) {
+  public downloadFile(id: string) {
     return this.bucket.openDownloadStream(new ObjectId(id));
   }
 
