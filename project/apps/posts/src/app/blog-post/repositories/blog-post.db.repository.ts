@@ -12,7 +12,7 @@ import {
   PostText as DBPostText,
   PostType as DBPostType,
   PostVideo as DBPostVideo,
-  Tag as DBTag
+  Tag as DBTag,
 } from "@prisma/client";
 import { BlogPostQuery } from '../query/blog-post.query';
 import { CreateRepostDto } from '../dto/create-repost.dto';
@@ -81,6 +81,7 @@ export class BlogPostDbRepository implements BlogPostRepository {
         throw new Error(`Unknown DBPostStatus: ${status}`);
     }
   }
+
 
   private mapDBPostTypeToPostType(type: DBPostType): PostTypeEnum {
     switch (type) {
